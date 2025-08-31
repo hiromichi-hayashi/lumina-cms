@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+storybook-static/
+
+# Generated files
+.prisma/
+*.d.ts
+
+# Environment files
+.env*
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Test results
+test-results/
+playwright-report/
+
+# Package files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Docker
+Dockerfile
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

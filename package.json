@@ -1,0 +1,42 @@
+{
+  "name": "lumina-cms",
+  "private": true,
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:coverage": "turbo run test:coverage",
+    "test:e2e": "turbo run test:e2e",
+    "storybook": "turbo run storybook --filter=web",
+    "db:generate": "npm run generate --workspace=db",
+    "db:push": "npm run push --workspace=db",
+    "db:migrate:dev": "npm run migrate:dev --workspace=db",
+    "db:seed": "npm run seed --workspace=db",
+    "db:studio": "npm run studio --workspace=db",
+    "docker:up": "docker-compose up -d postgres",
+    "docker:down": "docker-compose down",
+    "health": "./scripts/health-check.sh",
+    "check": "./scripts/health-check.sh",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "turbo": "^2.5.6"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}
