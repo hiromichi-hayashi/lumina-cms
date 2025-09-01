@@ -8,6 +8,7 @@ export const serverEnvSchema = z.object({
   API_PORT: z.string().transform(Number).default('8080'),
   JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters'),
   HOST: z.string().default('0.0.0.0'),
+  SUPABASE_SERVICE_ROLE_KEY: z.string(),
 })
 
 export const clientEnvSchema = z.object({

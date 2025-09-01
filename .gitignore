@@ -109,3 +109,6 @@ bundle-report.html
 # env
 .env.local
 .env
+
+AGENTS.md
+docs/
