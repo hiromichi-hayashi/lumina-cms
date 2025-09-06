@@ -112,3 +112,6 @@ bundle-report.html
 
 AGENTS.md
 docs/
+
+# claude
+*.claude
