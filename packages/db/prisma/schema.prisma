@@ -8,35 +8,248 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String
-  posts     Post[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("users")
+  id                       String                     @id @db.Uuid
+  email                    String                     @unique @db.VarChar(255)
+  displayName              String                     @map("display_name") @db.VarChar(100)
+  avatarUrl                String?                    @map("avatar_url")
+  role                     String                     @default("public") @db.VarChar(32)
+  status                   String                     @default("active") @db.VarChar(16)
+  provider                 String?                    @db.VarChar(32)
+  lastLoginAt              DateTime?                  @map("last_login_at") @db.Timestamptz(6)
+  createdAt                DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  commentModerationHistory CommentModerationHistory[]
+  postRevisions            PostRevision[]
+  postStatusHistories      PostStatusHistory[]
+  invitesSent              UserInvite[]               @relation("UserInviteInvitedBy")
+  loginAudits              UserLoginAudit[]
+  roleHistoryFrom          UserRoleHistory[]          @relation("UserRoleHistoryChangedBy")
+  roleHistoryTo            UserRoleHistory[]          @relation("UserRoleHistoryUser")
+  comments                 Comment[]
+  posts                    Post[]
+  mediaAssets              MediaAsset[]
+
+  @@index([role])
+  @@index([status])
+  @@map("m_users")
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
-  tags      Tag[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("posts")
+model UserRoleHistory {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  fromRole  String?  @map("from_role") @db.VarChar(32)
+  toRole    String   @map("to_role") @db.VarChar(32)
+  changedBy String?  @map("changed_by") @db.Uuid
+  changedAt DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
+  note      String?
+  changer   User?    @relation("UserRoleHistoryChangedBy", fields: [changedBy], references: [id])
+  user      User     @relation("UserRoleHistoryUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, changedAt(sort: Desc)])
+  @@map("a_user_role_history")
+}
+
+model UserLoginAudit {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  provider  String?  @db.VarChar(32)
+  ipAddress String?  @map("ip_address") @db.Inet
+  userAgent String?  @map("user_agent")
+  success   Boolean
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("a_user_login_audit")
+}
+
+model UserInvite {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String    @unique @db.VarChar(255)
+  role       String    @db.VarChar(32)
+  invitedBy  String?   @map("invited_by") @db.Uuid
+  token      String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status     String    @default("pending") @db.VarChar(16)
+  sentAt     DateTime  @default(now()) @map("sent_at") @db.Timestamptz(6)
+  acceptedAt DateTime? @map("accepted_at") @db.Timestamptz(6)
+  inviter    User?     @relation("UserInviteInvitedBy", fields: [invitedBy], references: [id])
+
+  @@index([status])
+  @@map("a_user_invites")
+}
+
+model MediaAsset {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  url        String
+  provider   String   @db.VarChar(32)
+  mimeType   String   @map("mime_type") @db.VarChar(100)
+  width      Int?
+  height     Int?
+  hash       String?  @unique
+  uploadedBy String?  @map("uploaded_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  posts      Post[]
+  uploader   User?    @relation(fields: [uploadedBy], references: [id])
+
+  @@map("m_media_assets")
+}
+
+model Category {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String     @db.VarChar(80)
+  slug        String     @unique @db.VarChar(120)
+  description String?
+  parentId    String?    @map("parent_id") @db.Uuid
+  depth       Int        @default(0)
+  sortOrder   Int        @default(0) @map("sort_order")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  posts       Post[]
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+
+  @@index([parentId])
+  @@index([sortOrder])
+  @@map("m_categories")
 }
 
 model Tag {
-  id    String @id @default(cuid())
-  name  String @unique
-  posts Post[]
-  
-  @@map("tags")
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @unique @db.VarChar(80)
+  slug        String    @unique @db.VarChar(120)
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  posts       PostTag[]
+
+  @@map("m_tags")
+}
+
+model Post {
+  id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String
+  slug           String              @unique @db.VarChar(160)
+  contentMd      String              @map("content_md")
+  excerpt        String?
+  status         String              @default("draft") @db.VarChar(16)
+  scheduledAt    DateTime?           @map("scheduled_at") @db.Timestamptz(6)
+  publishedAt    DateTime?           @map("published_at") @db.Timestamptz(6)
+  authorId       String              @map("author_id") @db.Uuid
+  categoryId     String?             @map("category_id") @db.Uuid
+  coverImageId   String?             @map("cover_image_id") @db.Uuid
+  seoTitle       String?             @map("seo_title") @db.VarChar(160)
+  seoDescription String?             @map("seo_description") @db.VarChar(200)
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  revisions      PostRevision[]
+  statusHistory  PostStatusHistory[]
+  comments       Comment[]
+  author         User                @relation(fields: [authorId], references: [id])
+  category       Category?           @relation(fields: [categoryId], references: [id])
+  coverImage     MediaAsset?         @relation(fields: [coverImageId], references: [id])
+  tags           PostTag[]
+
+  @@index([status])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([updatedAt(sort: Desc)])
+  @@index([publishedAt(sort: Desc)])
+  @@map("c_posts")
+}
+
+model PostTag {
+  postId    String   @map("post_id") @db.Uuid
+  tagId     String   @map("tag_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@index([tagId])
+  @@index([postId])
+  @@map("r_posts_tags")
+}
+
+model PostRevision {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  version   Int
+  title     String
+  contentMd String   @map("content_md")
+  createdBy String?  @map("created_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  creator   User?    @relation(fields: [createdBy], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, version])
+  @@index([postId])
+  @@map("a_post_revisions")
+}
+
+model PostStatusHistory {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postId     String   @map("post_id") @db.Uuid
+  fromStatus String?  @map("from_status") @db.VarChar(16)
+  toStatus   String   @map("to_status") @db.VarChar(16)
+  changedBy  String?  @map("changed_by") @db.Uuid
+  note       String?
+  changedAt  DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
+  changer    User?    @relation(fields: [changedBy], references: [id])
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, changedAt(sort: Desc)])
+  @@map("a_post_status_history")
+}
+
+model Comment {
+  id                String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postId            String                     @map("post_id") @db.Uuid
+  userId            String                     @map("user_id") @db.Uuid
+  parentId          String?                    @map("parent_id") @db.Uuid
+  body              String
+  status            String                     @default("pending") @db.VarChar(16)
+  createdAt         DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?                  @map("deleted_at") @db.Timestamptz(6)
+  moderationHistory CommentModerationHistory[]
+  parent            Comment?                   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies           Comment[]                  @relation("CommentReplies")
+  post              Post                       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user              User                       @relation(fields: [userId], references: [id])
+
+  @@index([postId, status, createdAt])
+  @@index([parentId])
+  @@index([userId])
+  @@map("c_comments")
+}
+
+model CommentModerationHistory {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  commentId  String   @map("comment_id") @db.Uuid
+  fromStatus String?  @map("from_status") @db.VarChar(16)
+  toStatus   String   @map("to_status") @db.VarChar(16)
+  changedBy  String?  @map("changed_by") @db.Uuid
+  reason     String?
+  changedAt  DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
+  moderator  User?    @relation(fields: [changedBy], references: [id])
+  comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId, changedAt(sort: Desc)])
+  @@map("a_comment_moderation_history")
+}
+
+model RevalidationOutbox {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entityType  String    @map("entity_type") @db.VarChar(32)
+  entityId    String?   @map("entity_id") @db.Uuid
+  event       String    @db.VarChar(16)
+  payload     Json?
+  status      String    @default("pending") @db.VarChar(16)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  processedAt DateTime? @map("processed_at") @db.Timestamptz(6)
+
+  @@index([status, createdAt])
+  @@index([entityType, entityId])
+  @@map("q_revalidation_outbox")
 }
