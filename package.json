@@ -19,6 +19,8 @@
     "db:generate": "npm run generate --workspace=db",
     "db:push": "npm run push --workspace=db",
     "db:migrate:dev": "npm run migrate:dev --workspace=db",
+    "db:migrate:deploy": "npm run migrate:deploy --workspace=db",
+    "db:migrate:reset": "npm run migrate:reset --workspace=db",
     "db:seed": "npm run seed --workspace=db",
     "db:studio": "npm run studio --workspace=db",
     "docker:up": "docker-compose up -d postgres",
@@ -30,6 +32,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.18.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^8.57.1",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",

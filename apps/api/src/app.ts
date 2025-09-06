@@ -63,7 +63,7 @@ export function createApp(options = {}): FastifyInstance {
   })
 
   // Health check route
-  app.get('/health', async (request, reply) => {
+  app.get('/health', async (_request, _reply) => {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
 

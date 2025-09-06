@@ -11,6 +11,9 @@ storybook-static/
 .prisma/
 *.d.ts
 
+# SQL migration files (Prisma-generated)
+**/*.sql
+
 # Environment files
 .env*
 
