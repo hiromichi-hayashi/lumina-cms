@@ -1,0 +1,51 @@
+#!/bin/bash
+# alias run="./Taskfile" を .zshrc または .bashrc に追加してから使ってください。
+
+function up {
+  docker compose up "$@"
+}
+
+function down {
+  docker compose down "$@"
+}
+
+function build {
+  docker compose build "$@"
+}
+
+function restart {
+  docker compose restart "$@"
+}
+
+function logs {
+  docker compose logs "$@"
+}
+
+function ps {
+  docker compose ps "$@"
+}
+
+function exec {
+  docker compose exec "$@"
+}
+
+function stop {
+  docker compose stop "$@"
+}
+
+function start {
+  docker compose start "$@"
+}
+
+function default {
+  help
+}
+
+function help {
+  echo "$0 (or run) <task> <args>"
+  echo "Tasks:"
+  compgen -A function | cat -n
+}
+
+TIMEFORMAT="Task completed in %3lR"
+time ${@:-default}

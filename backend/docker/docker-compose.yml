@@ -1,0 +1,53 @@
+version: '3.9'
+
+name: lumina_cms
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: lumina-postgres
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-developer}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_DATABASE:-lumina_cms}
+      TZ: Asia/Tokyo
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - lumina-network
+    restart: unless-stopped
+
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: lumina-postgres-test
+    ports:
+      - '${TEST_DB_PORT:-5433}:5432'
+    environment:
+      POSTGRES_USER: ${TEST_DB_USERNAME:-test_developer}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-password}
+      POSTGRES_DB: ${TEST_DB_DATABASE:-lumina_cms_test}
+      TZ: Asia/Tokyo
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - lumina-network
+    restart: unless-stopped
+
+  mailhog:
+    image: axllent/mailpit:latest
+    container_name: lumina-mailhog
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    networks:
+      - lumina-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+
+networks:
+  lumina-network:
+    driver: bridge

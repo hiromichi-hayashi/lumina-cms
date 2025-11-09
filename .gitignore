@@ -53,14 +53,8 @@ Thumbs.db
 *.swo
 *~
 
-# Prisma
-.prisma/
-
-# Turbo
-.turbo
-
-# Storybook
-storybook-static/
+# Drizzle
+drizzle/
 
 # Playwright
 test-results/
@@ -112,6 +106,7 @@ bundle-report.html
 
 AGENTS.md
 docs/
+.serena/
 
 # claude
 *.claude
