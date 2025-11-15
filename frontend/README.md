@@ -22,6 +22,7 @@ Next.js + React + Tailwind CSS + Better Auth
 - ✅ **エンタープライズ級の構造** - スケーラブルなディレクトリ設計
 - ✅ **型安全性** - TypeScript + Zodバリデーション
 - ✅ **設定の一元管理** - config/ディレクトリで定数・ルート管理
+- ✅ **3層コンポーネントアーキテクチャ** - 基盤層による高い再利用性
 - ✅ **コンポーネント階層化** - ui/layout/features/shared の明確な分離
 - ✅ **認証・テーマ管理** - React Context APIによる状態管理
 
@@ -221,10 +222,10 @@ frontend/
 |------------|------|
 | `app/(public)/` | **Route Group**: 認証不要な公開ページ |
 | `app/(protected)/` | **Route Group**: 認証必須の管理画面 |
-| `components/ui/` | 再利用可能なUIコンポーネント（shadcn/ui） |
-| `components/layout/` | ヘッダー、フッター等のレイアウト |
-| `components/features/` | 機能別コンポーネント（auth, posts等） |
-| `components/shared/` | 複数機能で共有されるコンポーネント |
+| `components/ui/` | **Phase 0 - 基盤UIコンポーネント**（shadcn/ui） |
+| `components/layout/` | **Phase 0 - レイアウトコンポーネント**（Header, Footer, AdminSidebar等） |
+| `components/features/` | **Phase 1-6 - 機能別コンポーネント**（auth, posts, users等） |
+| `components/shared/` | **共有コンポーネント**（複数機能で利用） |
 | `config/` | **設定の一元管理**（定数、ルート、サイト設定） |
 | `context/` | **React Context**（認証、テーマ等の状態管理） |
 | `lib/helpers/` | ヘルパー関数（日付、文字列、フォーマット） |
@@ -369,6 +370,10 @@ npx shadcn@latest add dialog
 
 追加されたコンポーネントは `src/components/ui/` に配置されます。
 
+**注意:**
+- 既存コンポーネントの変更は全画面に影響するため慎重に行ってください
+- プロジェクト固有のカスタマイズが必要な場合は `shared/` に新規作成を検討
+
 ## 🧪 開発のベストプラクティス
 
 ### コーディング規約
@@ -395,17 +400,39 @@ npx shadcn@latest add dialog
 
 ```
 components/
-├── ui/           # shadcn/uiのみ（編集しない）
-├── layout/       # ヘッダー、フッター等のレイアウト
-├── features/     # 機能別（auth, posts, users等）
+├── ui/           # shadcn/uiベースのプリミティブコンポーネント
+│                 # Button, Input, Card, Table, Dialog等（基本的に編集しない）
+│
+├── layout/       # レイアウトコンポーネント
+│                 # AdminSidebar, Header, Footer, Navigation等
+│                 # 全画面で共有される構造的なコンポーネント
+│
+├── features/     # 機能別コンポーネント
+│   ├── auth/     # 認証機能（ログイン、登録等）
+│   ├── posts/    # 記事管理（一覧、編集、プレビュー等）
+│   ├── users/    # ユーザー管理
+│   ├── categories/ # カテゴリ管理
+│   ├── labels/   # ラベル管理
+│   ├── contacts/ # お問い合わせ管理
+│   └── rankings/ # ランキング表示
+│
 └── shared/       # 複数機能で共有される汎用コンポーネント
+                  # ImageWithFallback, EmptyState等
 ```
 
 **配置の判断基準:**
-- 単一機能専用 → `features/[feature-name]/`
-- 複数機能で共有 → `shared/`
-- レイアウト関連 → `layout/`
-- プリミティブUI → `ui/`（shadcn/uiのみ）
+
+| 条件 | 配置先 | 例 |
+|------|--------|-----|
+| shadcn/uiから追加したプリミティブUI | `ui/` | Button, Input, Card, Dialog |
+| 全画面で使うレイアウト構造 | `layout/` | AdminSidebar, Header, Footer |
+| 特定機能に紐づくビジネスロジック | `features/[feature]/` | UserManagement, PostEditor |
+| 複数機能で再利用される汎用UI | `shared/` | ImageWithFallback, LoadingSpinner |
+
+**Phase 0 依存関係:**
+- すべての `features/` コンポーネントは `ui/` と `layout/` に依存
+- `features/` 間の相互依存は避ける（疎結合を維持）
+- 共通ロジックは `lib/` または `shared/` に抽出
 
 ### ヘルパー関数の配置
 
@@ -457,7 +484,3 @@ npm run type-check
 # TypeScriptサーバー再起動（VSCode）
 Cmd+Shift+P → "TypeScript: Restart TS Server"
 ```
-
-## 📄 ライセンス
-
-MIT License
