@@ -60,7 +60,7 @@ export function LoginForm() {
         });
         router.push('/dashboard');
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'エラー',
@@ -77,7 +77,7 @@ export function LoginForm() {
         provider: 'google',
         callbackURL: '/dashboard',
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'エラー',
@@ -92,7 +92,7 @@ export function LoginForm() {
         provider: 'github',
         callbackURL: '/dashboard',
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'エラー',
@@ -105,9 +105,7 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>ログイン</CardTitle>
-        <CardDescription>
-          アカウントにログインしてください
-        </CardDescription>
+        <CardDescription>アカウントにログインしてください</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -120,9 +118,7 @@ export function LoginForm() {
               {...register('email')}
               disabled={isLoading}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -135,9 +131,7 @@ export function LoginForm() {
               disabled={isLoading}
             />
             {errors.password && (
-              <p className="text-sm text-destructive">
-                {errors.password.message}
-              </p>
+              <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
 
@@ -151,9 +145,7 @@ export function LoginForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              または
-            </span>
+            <span className="bg-background px-2 text-muted-foreground">または</span>
           </div>
         </div>
 

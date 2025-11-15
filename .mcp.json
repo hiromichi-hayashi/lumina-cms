@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "serena": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server",
+        "--project",
+        "/Users/hh-pd09/Project/lumina-cms"
+      ],
+      "env": {}
+    },
+    "codex": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "codex-mcp@latest"
+      ],
+      "env": {}
+    }
+  }
+}

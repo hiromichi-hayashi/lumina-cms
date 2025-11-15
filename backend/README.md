@@ -34,35 +34,6 @@ npm install
 ```bash
 cp .env.example .env
 ```
-
-**`.env` の内容:**
-
-```env
-# 環境設定
-NODE_ENV=development
-APP_PORT=3001
-LOG_LEVEL=debug
-
-# データベース
-DB_HOST=localhost
-DB_PORT=5432
-DB_DATABASE=lumina_cms
-DB_USERNAME=developer
-DB_PASSWORD=password
-
-# 認証
-JWT_SECRET=dev-jwt-secret-key-min-32-chars-xxxxxxxxxx
-BETTER_AUTH_SECRET=dev-better-auth-secret-key-min-32-chars-xxxxxxxxxx
-BETTER_AUTH_URL=http://localhost:3001
-BETTER_AUTH_BASE_PATH=/api/auth
-
-# CORS
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost
-
-# Swagger
-SWAGGER_ENABLED=true
-```
-
 ### 3. PostgreSQL の起動（Docker）
 
 ```bash
@@ -203,7 +174,23 @@ backend/
 │   │   │   ├── users.ts         # ユーザーテーブル
 │   │   │   ├── accounts.ts      # OAuthアカウント
 │   │   │   ├── sessions.ts      # セッション
-│   │   │   └── verification-tokens.ts  # 認証トークン
+│   │   │   ├── verificationTokens.ts  # 認証トークン
+│   │   │   ├── blogPosts.ts     # ブログ記事
+│   │   │   ├── categories.ts    # カテゴリ
+│   │   │   ├── comments.ts      # コメント
+│   │   │   ├── likes.ts         # いいね
+│   │   │   ├── contacts.ts      # お問い合わせ
+│   │   │   ├── announcements.ts # お知らせ
+│   │   │   ├── labels.ts        # ラベル
+│   │   │   ├── postLabels.ts    # 記事ラベル中間テーブル
+│   │   │   ├── contentDrafts.ts # 下書き
+│   │   │   ├── contentRankings.ts # コンテンツランキング
+│   │   │   ├── seoMetadata.ts   # SEOメタデータ
+│   │   │   ├── auditLogs.ts     # 監査ログ
+│   │   │   ├── ngWords.ts       # NGワード
+│   │   │   └── enums.ts         # Enum定義
+│   │   ├── migrations/          # マイグレーションファイル
+│   │   │   └── meta/            # マイグレーションメタデータ
 │   │   ├── seeds/               # シードデータ
 │   │   │   └── index.ts         # シード実行スクリプト
 │   │   ├── drizzle.module.ts    # Drizzle Module
@@ -264,12 +251,29 @@ backend/
 |------------|------|
 | `config/` | 環境変数やアプリケーション設定の管理 |
 | `db/schema/` | Drizzle ORMのテーブル定義（TypeScript） |
+| `db/migrations/` | データベースマイグレーションファイル |
 | `db/seeds/` | 開発用の初期データ投入スクリプト |
 | `modules/` | 機能ごとのモジュール（auth、posts等） |
-| `common/` | 全モジュールで共有される機能 |
+| `modules/auth/dto/` | 認証関連のデータ転送オブジェクト |
+| `modules/common/` | 共通モジュール定義 |
+| `common/` | 全モジュールで共有される横断的機能 |
 | `common/guards/` | 認証・認可のガード（ミドルウェア） |
 | `common/decorators/` | カスタムデコレーター（@CurrentUser等） |
+| `common/filters/` | 例外フィルター（エラーハンドリング） |
+| `common/interceptors/` | インターセプター（レスポンス変換、ログ等） |
+| `common/pipes/` | バリデーションパイプ |
 | `health/` | ヘルスチェックエンドポイント |
+
+### NestJS公式推奨構造との整合性
+
+✅ **このプロジェクトはNestJS公式推奨のモジュラーアーキテクチャに完全準拠しています。**
+
+**主な特徴:**
+- Module/Controller/Service の3層構造を厳守
+- 横断的関心事（Guards, Filters, Interceptors, Pipes）を`common/`で適切に管理
+- 機能別モジュールを`modules/`で分離
+- Drizzle ORMのスキーマとマイグレーションを`db/`で一元管理
+- 依存性注入（DI）の徹底活用
 
 ## 🗄️ データベース管理
 
@@ -292,7 +296,7 @@ export const users = pgTable('users', {
 
 ```bash
 npm run db:generate
-# → drizzle/ ディレクトリにSQLファイルが生成される
+# → src/db/migrations/ ディレクトリにSQLファイルが生成される
 ```
 
 3. **マイグレーション実行**

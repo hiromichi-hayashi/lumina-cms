@@ -7,7 +7,7 @@ const protectedPaths = ['/dashboard', '/admin', '/profile', '/settings'];
 // 認証済みユーザーがアクセスできないパス（ログイン、登録ページなど）
 const authPaths = ['/login', '/register'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // セッションCookieの確認
@@ -15,9 +15,7 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!session;
 
   // 保護されたパスへのアクセス
-  const isProtectedPath = protectedPaths.some((path) =>
-    pathname.startsWith(path)
-  );
+  const isProtectedPath = protectedPaths.some((path) => pathname.startsWith(path));
 
   // 認証パスへのアクセス
   const isAuthPath = authPaths.some((path) => pathname.startsWith(path));

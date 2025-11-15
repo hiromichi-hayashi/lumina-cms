@@ -28,7 +28,7 @@ const registerSchema = z
       .min(8, 'パスワードは8文字以上で入力してください')
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        'パスワードは大文字、小文字、数字を含む必要があります'
+        'パスワードは大文字、小文字、数字を含む必要があります',
       ),
     confirmPassword: z.string(),
   })
@@ -74,7 +74,7 @@ export function RegisterForm() {
         });
         router.push('/dashboard');
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: 'destructive',
         title: 'エラー',
@@ -89,9 +89,7 @@ export function RegisterForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>新規登録</CardTitle>
-        <CardDescription>
-          新しいアカウントを作成してください
-        </CardDescription>
+        <CardDescription>新しいアカウントを作成してください</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -104,9 +102,7 @@ export function RegisterForm() {
               {...register('name')}
               disabled={isLoading}
             />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -118,9 +114,7 @@ export function RegisterForm() {
               {...register('email')}
               disabled={isLoading}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -133,9 +127,7 @@ export function RegisterForm() {
               disabled={isLoading}
             />
             {errors.password && (
-              <p className="text-sm text-destructive">
-                {errors.password.message}
-              </p>
+              <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
 
@@ -149,9 +141,7 @@ export function RegisterForm() {
               disabled={isLoading}
             />
             {errors.confirmPassword && (
-              <p className="text-sm text-destructive">
-                {errors.confirmPassword.message}
-              </p>
+              <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
             )}
           </div>
 
