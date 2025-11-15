@@ -2,7 +2,7 @@ import { pgTable, serial, uuid, varchar, text, integer, timestamp } from 'drizzl
 import { relations } from 'drizzle-orm';
 import { users } from './users';
 
-export const accounts = pgTable('accounts', {
+export const accounts = pgTable('s_accounts', {
   id: serial('id').primaryKey(),
   userId: uuid('user_id')
     .references(() => users.id, { onDelete: 'cascade' })

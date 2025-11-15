@@ -2,7 +2,7 @@ import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { users } from './users';
 
-export const sessions = pgTable('sessions', {
+export const sessions = pgTable('s_sessions', {
   id: uuid('id').defaultRandom().primaryKey(),
   sessionToken: varchar('session_token', { length: 255 }).notNull().unique(),
   userId: uuid('user_id')
