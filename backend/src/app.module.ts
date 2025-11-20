@@ -1,27 +1,47 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { CommonModule } from './modules/common/common.module';
-import { HealthModule } from './health/health.module';
+import { CommonModule } from './common/common.module';
 import { DrizzleModule } from './db/drizzle.module';
 import { AuthModule } from './modules/auth/auth.module';
+import appConfig from './config/app';
+import databaseConfig from './config/database';
+import authConfig from './config/auth';
+import serverConfig from './config/server';
+import throttleConfig from './config/throttle';
+import securityConfig from './config/security';
+import { validationSchema } from './config/validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
-    }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 100,
+      load: [
+        appConfig,
+        databaseConfig,
+        authConfig,
+        serverConfig,
+        throttleConfig,
+        securityConfig,
+      ],
+      validationSchema,
+      validationOptions: {
+        allowUnknown: true,
+        abortEarly: false,
       },
-    ]),
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get<number>('throttle.ttl'),
+          limit: config.get<number>('throttle.limit'),
+        },
+      ],
+    }),
+    CommonModule,
     DrizzleModule,
     AuthModule,
-    CommonModule,
-    HealthModule,
   ],
 })
 export class AppModule {}

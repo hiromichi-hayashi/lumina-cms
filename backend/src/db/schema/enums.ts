@@ -3,9 +3,10 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 /**
  * ユーザーロール
  * admin: 管理者
+ * editor: 編集者
  * member: メンバー
  */
-export const userRoleEnum = pgEnum('user_role', ['admin', 'member']);
+export const userRoleEnum = pgEnum('user_role', ['admin', 'editor', 'member']);
 
 /**
  * カラーテーマ

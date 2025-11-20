@@ -1,54 +1,62 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { ServerConfig } from './config/server';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const serverConfig = configService.get<ServerConfig>('server');
 
   // セキュリティヘッダー
-  app.use(helmet());
+  if (serverConfig.helmet.enabled) {
+    app.use(helmet());
+  }
 
   // 圧縮
-  app.use(compression());
+  if (serverConfig.compression.enabled) {
+    app.use(compression());
+  }
+
+  // Cookie Parser
+  if (serverConfig.cookieParser.enabled) {
+    app.use(cookieParser());
+  }
 
   // グローバルバリデーション
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe(serverConfig.validation));
 
   // CORS設定
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    credentials: true,
+    origin: serverConfig.cors.allowedOrigins,
+    credentials: serverConfig.cors.credentials,
   });
 
   // グローバルプレフィックス
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(serverConfig.globalPrefix);
 
   // Swagger設定
-  if (process.env.SWAGGER_ENABLED === 'true') {
+  if (serverConfig.swagger.enabled) {
     const config = new DocumentBuilder()
-      .setTitle('Lumina CMS API')
-      .setDescription('Enterprise Content Management System API')
-      .setVersion('1.0')
+      .setTitle(serverConfig.swagger.title)
+      .setDescription(serverConfig.swagger.description)
+      .setVersion(serverConfig.swagger.version)
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    SwaggerModule.setup(serverConfig.swagger.path, app, document);
   }
 
-  const port = process.env.APP_PORT || 3001;
+  const port = configService.get<number>('app.port', 3001);
   await app.listen(port);
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger UI: http://localhost:${port}/api/docs`);
+  console.log(`📚 Swagger UI: http://localhost:${port}/${serverConfig.swagger.path}`);
 }
 
 bootstrap();

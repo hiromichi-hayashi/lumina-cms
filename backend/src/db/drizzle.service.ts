@@ -3,6 +3,7 @@ import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as postgres from 'postgres';
 import * as schema from './schema';
 import { ConfigService } from '@nestjs/config';
+import { getDatabaseConnectionString } from '../config/database';
 
 @Injectable()
 export class DrizzleService implements OnModuleInit, OnModuleDestroy {
@@ -11,26 +12,9 @@ export class DrizzleService implements OnModuleInit, OnModuleDestroy {
   public db: PostgresJsDatabase<typeof schema>;
 
   constructor(private configService: ConfigService) {
-    // NODE_ENVに基づいてプレフィックスを切り替え
-    const isTest = process.env.NODE_ENV === 'test';
-    const prefix = isTest ? 'TEST_DB_' : 'DB_';
-
-    const dbHost = this.configService.get<string>(`${prefix}HOST`, 'localhost');
-    const dbPort = this.configService.get<number>(`${prefix}PORT`, isTest ? 5433 : 5432);
-    const dbDatabase = this.configService.get<string>(
-      `${prefix}DATABASE`,
-      isTest ? 'lumina_cms_test' : 'lumina_cms',
-    );
-    const dbUsername = this.configService.get<string>(
-      `${prefix}USERNAME`,
-      isTest ? 'test_user' : 'lumina',
-    );
-    const dbPassword = this.configService.get<string>(
-      `${prefix}PASSWORD`,
-      isTest ? 'test_password' : 'lumina_dev',
-    );
-
-    const connectionString = `postgres://${dbUsername}:${dbPassword}@${dbHost}:${dbPort}/${dbDatabase}`;
+    // NODE_ENVに基づいて接続文字列を取得
+    const isTest = this.configService.get<string>('app.nodeEnv') === 'test';
+    const connectionString = getDatabaseConnectionString(isTest);
 
     this.client = postgres(connectionString, {
       max: 10,
@@ -40,12 +24,13 @@ export class DrizzleService implements OnModuleInit, OnModuleDestroy {
 
     this.db = drizzle(this.client, {
       schema,
-      logger: process.env.NODE_ENV === 'development',
+      logger: this.configService.get<string>('app.nodeEnv') === 'development',
     });
 
     // 接続情報をログ出力（パスワードは隠す）
+    const connInfo = connectionString.replace(/:[^:@]+@/, ':****@');
     this.logger.log(
-      `Database connection: ${dbHost}:${dbPort}/${dbDatabase} (${isTest ? 'TEST' : 'DEV'})`,
+      `Database connection: ${connInfo} (${isTest ? 'TEST' : 'DEV'})`,
     );
   }
 

@@ -4,21 +4,24 @@ import {
   ExecutionContext,
   UnauthorizedException,
   Logger,
+  Inject,
 } from '@nestjs/common';
-import { AuthService } from '../../modules/auth/auth.service';
+import { Request } from 'express';
 
 /**
- * 認証ガード
+ * Better Auth統合 認証ガード
  *
- * リクエストにセッションが含まれているかをチェックし、
- * 認証されていない場合はUnauthorizedExceptionをスローします。
+ * Better AuthのセッションAPIを使用してリクエストを認証します。
+ * Cookie (lumina.session_token) からセッション情報を取得し、
+ * 有効なセッションの場合のみリクエストを許可します。
  *
  * 使用例:
  * ```typescript
  * @UseGuards(AuthGuard)
  * @Get('profile')
- * getProfile(@CurrentUser() user: User) {
- *   return user;
+ * getProfile(@Request() req) {
+ *   // req.user にBetter Authのユーザー情報が含まれます
+ *   return req.user;
  * }
  * ```
  */
@@ -26,22 +29,29 @@ import { AuthService } from '../../modules/auth/auth.service';
 export class AuthGuard implements CanActivate {
   private readonly logger = new Logger(AuthGuard.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject('BETTER_AUTH') private readonly auth: any) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
 
     try {
-      // セッションを取得
-      const session = await this.authService.getSession(request);
+      // Better AuthのセッションAPIを使用してセッションを取得
+      // Better Authは自動的にCookieからセッショントークンを読み取ります
+      const session = await this.auth.api.getSession({
+        headers: request.headers,
+      });
 
       if (!session || !session.user) {
+        this.logger.debug('No valid session found');
         throw new UnauthorizedException('認証が必要です');
       }
 
       // リクエストオブジェクトにユーザー情報を追加
-      request.user = session.user;
-      request.session = session.session;
+      // Better Authのユーザーオブジェクトをそのまま使用
+      (request as any).user = session.user;
+      (request as any).session = session.session;
+
+      this.logger.debug(`User ${session.user.id} authenticated via Better Auth`);
 
       return true;
     } catch (error) {

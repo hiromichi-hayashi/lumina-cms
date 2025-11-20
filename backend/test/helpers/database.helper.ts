@@ -37,6 +37,11 @@ export class DatabaseTestHelper {
 
   /**
    * 全テーブルのデータをクリーンアップ
+   *
+   * TRUNCATE を使用することで:
+   * - DELETE より高速
+   * - AUTO_INCREMENT (シーケンス) もリセット
+   * - CASCADE で外部キー制約も自動処理
    */
   async cleanup(): Promise<void> {
     if (!this.db) {
@@ -44,19 +49,18 @@ export class DatabaseTestHelper {
     }
 
     try {
-      // 外部キー制約を一時的に無効化
-      await this.client!`SET session_replication_role = 'replica'`;
+      // TRUNCATE使用（DELETEより高速、シーケンスもリセット）
+      await this.client!`
+        TRUNCATE TABLE
+          sessions,
+          accounts,
+          verification_tokens,
+          users
+        RESTART IDENTITY
+        CASCADE
+      `;
 
-      // 各テーブルのデータを削除
-      await this.db.delete(schema.sessions);
-      await this.db.delete(schema.accounts);
-      await this.db.delete(schema.users);
-      await this.db.delete(schema.verificationTokens);
-
-      // 外部キー制約を再度有効化
-      await this.client!`SET session_replication_role = 'origin'`;
-
-      console.log('🧹 テスト用DBをクリーンアップしました');
+      console.log('🧹 テスト用DBをクリーンアップしました (TRUNCATE)');
     } catch (error) {
       console.error('❌ クリーンアップ失敗:', error);
       throw error;

@@ -1,5 +1,8 @@
 import { pgTable, uuid, varchar, timestamp, boolean, integer } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 import { userRoleEnum } from './enums';
+import { sessions } from './sessions';
+import { accounts } from './accounts';
 
 /**
  * m_users - ユーザーテーブル (NextAuth Users)
@@ -24,6 +27,15 @@ export const users = pgTable('m_users', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+/**
+ * ユーザーリレーション定義
+ * セッションとアカウントへの1対多リレーション
+ */
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+  accounts: many(accounts),
+}));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

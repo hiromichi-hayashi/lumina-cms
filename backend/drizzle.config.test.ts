@@ -2,7 +2,7 @@ import type { Config } from 'drizzle-kit';
 import { getDatabaseCredentials } from './src/config/database';
 
 const { host, port, database, username, password } =
-  getDatabaseCredentials(false);
+  getDatabaseCredentials(true);
 
 export default {
   schema: './src/db/schema/index.ts',

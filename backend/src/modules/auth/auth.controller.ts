@@ -1,81 +1,37 @@
-import { All, Controller, Req, Res, Logger } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { All, Controller, Req, Res, Inject, Logger } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { AuthService } from './auth.service';
 
+/**
+ * Better Auth統合コントローラー
+ *
+ * すべての認証リクエスト (/api/auth/*) をBetter Authのハンドラーに委譲します。
+ * カスタムビジネスロジック（アカウントロック、ログイン試行管理等）は
+ * better-auth.config.tsのフック機能で実装されています。
+ */
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject('BETTER_AUTH') private readonly auth: any) {
+    this.logger.log('Better Auth handler initialized');
+  }
 
   /**
-   * Better Authの全てのエンドポイントをハンドル
+   * すべての認証リクエストをBetter Authに転送
    *
-   * Better Authは以下のエンドポイントを自動的に生成します:
-   * - POST /auth/sign-in/email - メール/パスワードログイン
-   * - POST /auth/sign-up/email - メール/パスワード登録
-   * - POST /auth/sign-out - ログアウト
-   * - GET /auth/session - セッション取得
-   * - POST /auth/two-factor/enable - 2FA有効化
-   * - POST /auth/two-factor/verify - 2FA検証
-   * - POST /auth/sign-in/social - ソーシャルログイン
-   *
-   * その他の詳細は Better Auth ドキュメントを参照:
-   * https://www.better-auth.com/docs/concepts/authentication
+   * Better Authがサポートするエンドポイント:
+   * - POST /api/auth/sign-in/email - メール+パスワードでサインイン
+   * - POST /api/auth/sign-up/email - メール+パスワードで新規登録
+   * - POST /api/auth/sign-out - サインアウト
+   * - GET  /api/auth/session - セッション取得
+   * - POST /api/auth/callback/google - Google OAuthコールバック
+   * - POST /api/auth/callback/github - GitHub OAuthコールバック
+   * - その他Better Authが提供するすべてのエンドポイント
    */
   @All('*')
-  @ApiOperation({
-    summary: 'Better Auth エンドポイント',
-    description: '認証関連の全てのエンドポイントを処理します',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'リクエストが正常に処理されました',
-  })
-  @ApiResponse({
-    status: 401,
-    description: '認証に失敗しました',
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'サーバーエラー',
-  })
-  async handleAuth(@Req() request: Request, @Res() response: Response) {
-    try {
-      // Better Authのハンドラーを使用してリクエストを処理
-      const handler = this.authService.getHandler();
-
-      // Fetch API Request形式に変換
-      const url = new URL(request.originalUrl, `${request.protocol}://${request.get('host')}`);
-
-      const fetchRequest = new Request(url, {
-        method: request.method,
-        headers: request.headers as HeadersInit,
-        body: ['GET', 'HEAD'].includes(request.method) ? undefined : JSON.stringify(request.body),
-      });
-
-      // Better Authでリクエストを処理
-      const fetchResponse = await handler(fetchRequest);
-
-      // レスポンスヘッダーをコピー
-      fetchResponse.headers.forEach((value, key) => {
-        response.setHeader(key, value);
-      });
-
-      // ステータスコードを設定
-      response.status(fetchResponse.status);
-
-      // レスポンスボディを送信
-      const responseBody = await fetchResponse.text();
-      response.send(responseBody);
-    } catch (error) {
-      this.logger.error('Auth handler error', error);
-      response.status(500).json({
-        error: 'Internal Server Error',
-        message: 'An error occurred while processing the authentication request',
-      });
-    }
+  async handleAuth(@Req() req: Request, @Res() res: Response) {
+    return this.auth.handler(req, res);
   }
 }

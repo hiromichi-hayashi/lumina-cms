@@ -1,74 +1,76 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { DrizzleService } from '../../db/drizzle.service';
-import { createBetterAuthConfig } from './better-auth.config';
+import { SessionRepository } from './repositories/session.repository';
+import { VerificationTokenRepository } from './repositories/verification-token.repository';
 
+/**
+ * 認証ヘルパーサービス
+ *
+ * Better Authが認証処理を担当し、このサービスはユーティリティ機能のみを提供します:
+ * - セッションのハウスキーピング（期限切れセッションの削除）
+ * - 検証トークンのクリーンアップ
+ * - その他のメンテナンスタスク
+ *
+ * NOTE: Cronジョブは@nestjs/scheduleパッケージをインストール後に有効化できます
+ */
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  public readonly auth: ReturnType<typeof createBetterAuthConfig>;
 
   constructor(
-    private readonly drizzleService: DrizzleService,
-    private readonly configService: ConfigService,
+    private readonly sessionRepository: SessionRepository,
+    private readonly verificationTokenRepository: VerificationTokenRepository,
   ) {
-    // Better Auth設定を初期化
-    this.auth = createBetterAuthConfig(drizzleService, configService);
-    this.logger.log('Better Auth initialized successfully');
+    this.logger.log('AuthService initialized (Helper mode with Better Auth)');
   }
 
   /**
-   * Better Authのハンドラーを取得
+   * 期限切れセッション削除（ハウスキーピング）
+   * 手動実行またはCronジョブとして設定可能
    */
-  getHandler() {
-    return this.auth.handler;
-  }
-
-  /**
-   * セッションからユーザー情報を取得
-   */
-  async getSession(request: Request) {
+  async cleanupExpiredSessions(): Promise<number> {
     try {
-      const session = await this.auth.api.getSession({
-        headers: request.headers,
-      });
-      return session;
+      const deletedCount = await this.sessionRepository.deleteExpired();
+
+      if (deletedCount > 0) {
+        this.logger.log(`🧹 Cleaned up ${deletedCount} expired sessions`);
+      }
+
+      return deletedCount;
     } catch (error) {
-      this.logger.error('Failed to get session', error);
-      return null;
+      this.logger.error('Failed to cleanup expired sessions', error);
+      throw error;
     }
   }
 
   /**
-   * ユーザーをIDで取得
-   * Better AuthのAPIには getUser() が存在しないため、Drizzle ORMで直接クエリ
+   * 期限切れ検証トークン削除
+   * 手動実行またはCronジョブとして設定可能
    */
-  async getUserById(userId: string) {
+  async cleanupExpiredVerificationTokens(): Promise<number> {
     try {
-      const user = await this.drizzleService.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, userId),
-      });
-      return user;
+      const deletedCount = await this.verificationTokenRepository.deleteExpired();
+
+      if (deletedCount > 0) {
+        this.logger.log(`🧹 Cleaned up ${deletedCount} expired verification tokens`);
+      }
+
+      return deletedCount;
     } catch (error) {
-      this.logger.error(`Failed to get user ${userId}`, error);
-      return null;
+      this.logger.error('Failed to cleanup expired verification tokens', error);
+      throw error;
     }
   }
 
   /**
-   * セッションを無効化（ログアウト）
+   * 統計情報取得
+   * アクティブセッション数を取得
    */
-  async invalidateSession(sessionToken: string) {
+  async getActiveSessionsCount(): Promise<number> {
     try {
-      await this.auth.api.signOut({
-        headers: {
-          cookie: `lumina.session_token=${sessionToken}`,
-        },
-      });
-      return true;
+      return await this.sessionRepository.countActive();
     } catch (error) {
-      this.logger.error('Failed to invalidate session', error);
-      return false;
+      this.logger.error('Failed to get active sessions count', error);
+      return 0;
     }
   }
 }

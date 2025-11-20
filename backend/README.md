@@ -199,10 +199,7 @@ backend/
 │   │
 │   ├── modules/                 # 機能モジュール
 │   │   ├── auth/                # 認証モジュール（Better Auth）
-│   │   │   ├── dto/             # データ転送オブジェクト
-│   │   │   │   ├── login.dto.ts
-│   │   │   │   ├── register.dto.ts
-│   │   │   │   └── auth-response.dto.ts
+│   │   │   ├── plugins/         # Better Authプラグイン
 │   │   │   ├── auth.module.ts   # 認証モジュール定義
 │   │   │   ├── auth.service.ts  # 認証ビジネスロジック
 │   │   │   ├── auth.controller.ts  # 認証エンドポイント
@@ -254,7 +251,7 @@ backend/
 | `db/migrations/` | データベースマイグレーションファイル |
 | `db/seeds/` | 開発用の初期データ投入スクリプト |
 | `modules/` | 機能ごとのモジュール（auth、posts等） |
-| `modules/auth/dto/` | 認証関連のデータ転送オブジェクト |
+| `modules/auth/plugins/` | Better Auth用のカスタムプラグイン |
 | `modules/common/` | 共通モジュール定義 |
 | `common/` | 全モジュールで共有される横断的機能 |
 | `common/guards/` | 認証・認可のガード（ミドルウェア） |
@@ -452,7 +449,7 @@ npm install
 | モジュール | kebab-case.module.ts | `auth.module.ts` |
 | コントローラー | kebab-case.controller.ts | `auth.controller.ts` |
 | サービス | kebab-case.service.ts | `auth.service.ts` |
-| DTO | kebab-case.dto.ts | `login.dto.ts` |
+| プラグイン | kebab-case.plugin.ts | `login-attempts.plugin.ts` |
 | 定数 | UPPER_SNAKE_CASE | `DATABASE_CONFIG` |
 
 ## 📄 ライセンス

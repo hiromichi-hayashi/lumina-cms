@@ -1,47 +1,47 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '../schema';
-import * as bcrypt from 'bcrypt';
-import * as dotenv from 'dotenv';
+import { getDatabaseConnectionString } from '../../config/database';
+import { seedUsers } from './users';
 
-dotenv.config({ path: '.env' });
-
+/**
+ * シーダーメイン処理
+ * 各エンティティのシーダーを順次実行
+ */
 async function seed() {
-  const dbHost = process.env.DB_HOST || 'localhost';
-  const dbPort = process.env.DB_PORT || '5432';
-  const dbDatabase = process.env.DB_DATABASE || 'lumina_cms';
-  const dbUsername = process.env.DB_USERNAME || 'lumina';
-  const dbPassword = process.env.DB_PASSWORD || 'lumina_dev';
+  // セキュリティ設定から定数として管理（src/config/security.ts参照）
+  const bcryptRounds = 10;
 
-  const connectionString = `postgres://${dbUsername}:${dbPassword}@${dbHost}:${dbPort}/${dbDatabase}`;
+  const connectionString = getDatabaseConnectionString(false);
 
   const client = postgres(connectionString);
   const db = drizzle(client, { schema });
 
   console.log('🌱 Seeding database...');
+  console.log('');
 
-  // 管理者ユーザー作成
-  const hashedPassword = await bcrypt.hash('Admin@123', 10);
+  try {
+    // ユーザーデータのシード
+    await seedUsers(db, bcryptRounds);
 
-  await db
-    .insert(schema.users)
-    .values({
-      email: 'admin@lumina-cms.local',
-      password: hashedPassword,
-      name: 'システム管理者',
-      role: 'admin',
-      isActive: true,
-      emailVerified: new Date(),
-    })
-    .onConflictDoNothing();
+    // 今後、他のシーダーを追加する場合はここに記述
+    // await seedCategories(db);
+    // await seedBlogPosts(db);
+    // await seedComments(db);
 
-  console.log('✅ Seeding completed!');
+    console.log('');
+    console.log('✅ Seeding completed successfully!');
+  } catch (error) {
+    console.error('❌ Seeding failed:', error);
+    throw error;
+  } finally {
+    await client.end();
+  }
 
-  await client.end();
   process.exit(0);
 }
 
 seed().catch((error) => {
-  console.error('❌ Seeding failed:', error);
+  console.error('❌ Fatal error:', error);
   process.exit(1);
 });
