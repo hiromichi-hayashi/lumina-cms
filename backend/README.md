@@ -218,10 +218,6 @@ backend/
 │   │   ├── interceptors/        # インターセプター
 │   │   └── pipes/               # バリデーションパイプ
 │   │
-│   ├── health/                  # ヘルスチェック
-│   │   ├── health.module.ts
-│   │   └── health.controller.ts
-│   │
 │   ├── app.module.ts            # ルートモジュール
 │   └── main.ts                  # アプリケーションエントリーポイント
 │
@@ -259,7 +255,6 @@ backend/
 | `common/filters/` | 例外フィルター（エラーハンドリング） |
 | `common/interceptors/` | インターセプター（レスポンス変換、ログ等） |
 | `common/pipes/` | バリデーションパイプ |
-| `health/` | ヘルスチェックエンドポイント |
 
 ### NestJS公式推奨構造との整合性
 

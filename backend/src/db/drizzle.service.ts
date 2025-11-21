@@ -29,9 +29,7 @@ export class DrizzleService implements OnModuleInit, OnModuleDestroy {
 
     // 接続情報をログ出力（パスワードは隠す）
     const connInfo = connectionString.replace(/:[^:@]+@/, ':****@');
-    this.logger.log(
-      `Database connection: ${connInfo} (${isTest ? 'TEST' : 'DEV'})`,
-    );
+    this.logger.log(`Database connection: ${connInfo} (${isTest ? 'TEST' : 'DEV'})`);
   }
 
   async onModuleInit() {

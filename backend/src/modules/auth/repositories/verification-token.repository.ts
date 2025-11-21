@@ -1,4 +1,4 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../common/repositories/base.repository';
 import { DrizzleService } from '../../../db/drizzle.service';
 import { verificationTokens, VerificationToken, NewVerificationToken } from '../../../db/schema';
@@ -37,8 +37,13 @@ export class VerificationTokenRepository extends BaseRepository<
   /**
    * 識別子とトークンで検索
    */
-  async findByIdentifierAndToken(identifier: string, token: string): Promise<VerificationToken | undefined> {
-    return this.findOne(and(eq(this.table.identifier, identifier), eq(this.table.token, token)) as any);
+  async findByIdentifierAndToken(
+    identifier: string,
+    token: string,
+  ): Promise<VerificationToken | undefined> {
+    return this.findOne(
+      and(eq(this.table.identifier, identifier), eq(this.table.token, token)) as any,
+    );
   }
 
   /**
@@ -80,8 +85,13 @@ export class VerificationTokenRepository extends BaseRepository<
   /**
    * 識別子とトークンで削除
    */
-  async deleteByIdentifierAndToken(identifier: string, token: string): Promise<VerificationToken | undefined> {
-    const deleted = await this.delete(and(eq(this.table.identifier, identifier), eq(this.table.token, token)) as any);
+  async deleteByIdentifierAndToken(
+    identifier: string,
+    token: string,
+  ): Promise<VerificationToken | undefined> {
+    const deleted = await this.delete(
+      and(eq(this.table.identifier, identifier), eq(this.table.token, token)) as any,
+    );
     return deleted[0];
   }
 

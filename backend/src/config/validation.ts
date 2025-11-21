@@ -3,12 +3,8 @@ import * as Joi from 'joi';
 export const validationSchema = Joi.object({
   // アプリケーション設定
   APP_PORT: Joi.number().default(3001),
-  NODE_ENV: Joi.string()
-    .valid('development', 'production', 'test')
-    .default('development'),
-  LOG_LEVEL: Joi.string()
-    .valid('error', 'warn', 'info', 'debug')
-    .default('debug'),
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'debug').default('debug'),
 
   // データベース設定
   DB_HOST: Joi.string().default('localhost'),
@@ -27,7 +23,7 @@ export const validationSchema = Joi.object({
   // 認証設定
   BETTER_AUTH_SECRET: Joi.string().required(),
   BETTER_AUTH_URL: Joi.string().default('http://localhost:3001'),
-  BETTER_AUTH_BASE_PATH: Joi.string().default('/api/auth'),
+  BETTER_AUTH_BASE_PATH: Joi.string().allow('').default('/api/auth'),
 
   // OAuth Providers（オプション）
   GOOGLE_CLIENT_ID: Joi.string().allow('').optional(),
@@ -45,9 +41,7 @@ export const validationSchema = Joi.object({
   // Swagger
   SWAGGER_ENABLED: Joi.boolean().default(true),
   SWAGGER_TITLE: Joi.string().default('Lumina CMS API'),
-  SWAGGER_DESCRIPTION: Joi.string().default(
-    'Enterprise Content Management System API',
-  ),
+  SWAGGER_DESCRIPTION: Joi.string().default('Enterprise Content Management System API'),
   SWAGGER_VERSION: Joi.string().default('1.0'),
   SWAGGER_PATH: Joi.string().default('api/docs'),
 

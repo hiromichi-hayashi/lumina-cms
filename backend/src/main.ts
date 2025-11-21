@@ -9,7 +9,10 @@ import { AppModule } from './app.module';
 import { ServerConfig } from './config/server';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Better Authが独自にBody Parsingを行うため、NestJSのBody Parserを無効化
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false,
+  });
   const configService = app.get(ConfigService);
   const serverConfig = configService.get<ServerConfig>('server');
 

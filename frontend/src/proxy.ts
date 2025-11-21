@@ -11,7 +11,9 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // セッションCookieの確認
-  const session = request.cookies.get('better-auth.session_token');
+  // Better Authの設定で cookiePrefix: 'lumina' を使用しているため、
+  // Cookie名は 'lumina.session_token' になります
+  const session = request.cookies.get('lumina.session_token');
   const isAuthenticated = !!session;
 
   // 保護されたパスへのアクセス

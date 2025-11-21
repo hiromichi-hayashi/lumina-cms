@@ -1,7 +1,5 @@
-import { Module } from '@nestjs/common';
-import { AuthGuard } from './guards/auth.guard';
+import { Module, Global } from '@nestjs/common';
 import { RolesGuard } from './guards/roles.guard';
-import { ZodValidationPipe } from './pipes/zod-validation.pipe';
 
 /**
  * CommonModule
@@ -15,9 +13,16 @@ import { ZodValidationPipe } from './pipes/zod-validation.pipe';
  *
  * NestJS公式推奨のベストプラクティスに従い、
  * 複数のモジュールで再利用される共通機能をここに集約します。
+ *
+ * NOTE: AuthGuardはBETTER_AUTHプロバイダーに依存するため、AuthModuleに配置されています。
+ * AuthGuardを使用する場合は、モジュールでAuthModuleをインポートしてください。
+ *
+ * NOTE: ZodValidationPipeはパラメータ化パイプのため、DIコンテナで管理されません。
+ * 各エンドポイントで直接インスタンス化してください: @Body(new ZodValidationPipe(schema))
  */
+@Global()
 @Module({
-  providers: [AuthGuard, RolesGuard, ZodValidationPipe],
-  exports: [AuthGuard, RolesGuard, ZodValidationPipe],
+  providers: [RolesGuard],
+  exports: [RolesGuard],
 })
 export class CommonModule {}

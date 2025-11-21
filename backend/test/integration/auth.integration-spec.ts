@@ -65,7 +65,7 @@ describe('Better Auth Integration Tests (E2E)', () => {
       expect(signinRes.body.user).toBeDefined();
       expect(signinRes.body.user.email).toBe('test@example.com');
 
-      const cookies = signinRes.headers['set-cookie'];
+      const cookies = signinRes.headers['set-cookie'] as unknown as string[];
       expect(cookies).toBeDefined();
       // Better AuthはcookiePrefix: 'lumina'を使用
       expect(cookies.some((c: string) => c.includes('lumina.session_token'))).toBe(true);
@@ -95,9 +95,7 @@ describe('Better Auth Integration Tests (E2E)', () => {
     });
 
     it('セッションなしでGET /api/auth/sessionを呼び出すと{ user: null }が返されること', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/auth/session')
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/auth/session').expect(200);
 
       expect(res.body.user).toBeNull();
     });
@@ -181,8 +179,8 @@ describe('Better Auth Integration Tests (E2E)', () => {
       expect(res.body.user.email).toBe('unlocked@example.com');
 
       // ログイン成功後、loginAttemptsとlockedUntilがリセットされることを確認
-      const [updatedUser] = await testDb.db!
-        .select()
+      const [updatedUser] = await testDb
+        .db!.select()
         .from(users)
         .where(eq(users.email, 'unlocked@example.com'));
 
@@ -205,8 +203,8 @@ describe('Better Auth Integration Tests (E2E)', () => {
       });
 
       // ログイン前の状態確認
-      const [userBefore] = await testDb.db!
-        .select()
+      const [userBefore] = await testDb
+        .db!.select()
         .from(users)
         .where(eq(users.email, 'test@example.com'));
 
@@ -222,8 +220,8 @@ describe('Better Auth Integration Tests (E2E)', () => {
         .expect(200);
 
       // ログイン後の状態確認
-      const [userAfter] = await testDb.db!
-        .select()
+      const [userAfter] = await testDb
+        .db!.select()
         .from(users)
         .where(eq(users.email, 'test@example.com'));
 
@@ -253,8 +251,8 @@ describe('Better Auth Integration Tests (E2E)', () => {
         .expect(200);
 
       // ログイン後の状態確認
-      const [userAfter] = await testDb.db!
-        .select()
+      const [userAfter] = await testDb
+        .db!.select()
         .from(users)
         .where(eq(users.email, 'test@example.com'));
 
@@ -330,7 +328,7 @@ describe('Better Auth Integration Tests (E2E)', () => {
         })
         .expect(200);
 
-      const cookies = res.headers['set-cookie'];
+      const cookies = res.headers['set-cookie'] as unknown as string[];
       expect(cookies).toBeDefined();
 
       const sessionCookie = cookies.find((c: string) => c.includes('lumina.session_token'));

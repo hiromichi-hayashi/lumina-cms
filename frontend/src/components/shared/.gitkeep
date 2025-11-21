@@ -1,4 +1,0 @@
-# 共通コンポーネント用ディレクトリ
-#
-# 複数の機能で共有されるコンポーネントを配置
-# 例: LoadingSpinner, ErrorMessage, EmptyState等

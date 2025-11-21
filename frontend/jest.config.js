@@ -38,6 +38,11 @@ const customJestConfig = {
     '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
   ],
 
+  // ESMパッケージをトランスパイルする
+  transformIgnorePatterns: [
+    'node_modules/(?!(nanostores|better-auth|@better-auth)/)',
+  ],
+
   // カバレッジ閾値
   coverageThreshold: {
     global: {

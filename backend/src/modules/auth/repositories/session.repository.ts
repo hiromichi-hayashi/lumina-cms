@@ -34,7 +34,9 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * ユーザーIDでアクティブなセッション取得
    */
   async findActiveByUserId(userId: string): Promise<Session[]> {
-    return this.findMany(and(eq(this.table.userId, userId), gt(this.table.expires, new Date())) as any);
+    return this.findMany(
+      and(eq(this.table.userId, userId), gt(this.table.expires, new Date())) as any,
+    );
   }
 
   /**
@@ -73,7 +75,9 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * ユーザーのアクティブセッション数をカウント
    */
   async countActiveByUserId(userId: string): Promise<number> {
-    return this.count(and(eq(this.table.userId, userId), gt(this.table.expires, new Date())) as any);
+    return this.count(
+      and(eq(this.table.userId, userId), gt(this.table.expires, new Date())) as any,
+    );
   }
 
   /**

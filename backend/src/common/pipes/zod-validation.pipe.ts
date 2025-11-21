@@ -1,4 +1,4 @@
-import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
+import { PipeTransform, BadRequestException } from '@nestjs/common';
 import { z } from 'zod';
 
 /**
@@ -13,8 +13,10 @@ import { z } from 'zod';
  *   // ...
  * }
  * ```
+ *
+ * NOTE: このパイプはDIコンテナで管理されません。
+ * 各エンドポイントで `new ZodValidationPipe(schema)` として直接インスタンス化してください。
  */
-@Injectable()
 export class ZodValidationPipe implements PipeTransform {
   constructor(private schema: z.ZodTypeAny) {}
 

@@ -1,5 +1,5 @@
 import { BetterAuthPlugin } from 'better-auth';
-import { createAuthMiddleware, APIError } from 'better-auth/api';
+import { createAuthMiddleware } from 'better-auth/api';
 import { ConfigService } from '@nestjs/config';
 import { DrizzleService } from '../../../db/drizzle.service';
 import { SecurityConfig } from '../../../config/security';
@@ -72,8 +72,7 @@ export const loginAttemptsPlugin = (
 
                 // 最大試行回数を超えた場合ロック
                 if (newAttempts >= securityConfig.accountLock.maxLoginAttempts) {
-                  const lockDuration =
-                    securityConfig.accountLock.lockDurationMinutes * 60 * 1000;
+                  const lockDuration = securityConfig.accountLock.lockDurationMinutes * 60 * 1000;
                   const lockedUntil = new Date(Date.now() + lockDuration);
 
                   await drizzleService.db

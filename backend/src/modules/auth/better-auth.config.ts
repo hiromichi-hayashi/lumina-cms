@@ -1,6 +1,7 @@
-import { betterAuth } from 'better-auth';
+import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { createAuthMiddleware, APIError } from 'better-auth/api';
+import { customSession } from 'better-auth/plugins';
 import { ConfigService } from '@nestjs/config';
 import { DrizzleService } from '../../db/drizzle.service';
 import { users } from '../../db/schema';
@@ -32,7 +33,8 @@ export function createBetterAuthConfig(
     throw new Error('BETTER_AUTH_SECRET environment variable is required');
   }
 
-  return betterAuth({
+  // Better Auth設定オプション（型推論用に分離）
+  const options = {
     database: drizzleAdapter(drizzleService.db, {
       provider: 'pg',
       schema: {
@@ -43,6 +45,40 @@ export function createBetterAuthConfig(
         verification: 's_verification_tokens',
       },
     }),
+
+    // ユーザースキーマ拡張
+    user: {
+      additionalFields: {
+        role: {
+          type: 'string',
+          required: true,
+          defaultValue: 'member',
+          input: false, // ユーザーがサインアップ時にroleを設定できないようにする
+        },
+        isActive: {
+          type: 'boolean',
+          required: true,
+          defaultValue: true,
+          input: false,
+        },
+        loginAttempts: {
+          type: 'number',
+          required: true,
+          defaultValue: 0,
+          input: false,
+        },
+        lockedUntil: {
+          type: 'date',
+          required: false,
+          input: false,
+        },
+        lastLoginAt: {
+          type: 'date',
+          required: false,
+          input: false,
+        },
+      },
+    },
 
     // メール・パスワード認証
     emailAndPassword: {
@@ -180,9 +216,24 @@ export function createBetterAuthConfig(
     secret: authConfig.betterAuthSecret,
 
     // トラストプロキシ（リバースプロキシ使用時）
-    trustedOrigins: [
-      serverConfig.frontendUrl,
-      ...serverConfig.cors.allowedOrigins,
+    trustedOrigins: [serverConfig.frontendUrl, ...serverConfig.cors.allowedOrigins],
+  } satisfies BetterAuthOptions;
+
+  // betterAuthインスタンス作成（customSessionプラグインを追加）
+  return betterAuth({
+    ...options,
+    plugins: [
+      ...(options.plugins ?? []),
+      // カスタムセッション: roleフィールドをセッションレスポンスに含める
+      customSession(async ({ user, session }) => {
+        return {
+          user: {
+            ...user,
+            role: user.role as 'admin' | 'editor' | 'member',
+          },
+          session,
+        };
+      }, options),
     ],
   });
 }

@@ -26,23 +26,14 @@ export interface DatabaseCredentials {
  * @param isTest テスト環境かどうか
  * @returns データベース接続情報
  */
-export function getDatabaseCredentials(
-  isTest: boolean = false,
-): DatabaseCredentials {
+export function getDatabaseCredentials(isTest: boolean = false): DatabaseCredentials {
   const prefix = isTest ? 'TEST_DB_' : 'DB_';
 
   return {
     host: process.env[`${prefix}HOST`] || 'localhost',
-    port: parseInt(
-      process.env[`${prefix}PORT`] || (isTest ? '5433' : '5432'),
-      10,
-    ),
-    database:
-      process.env[`${prefix}DATABASE`] ||
-      (isTest ? 'lumina_cms_test' : 'lumina_cms'),
-    username:
-      process.env[`${prefix}USERNAME`] ||
-      (isTest ? 'test_developer' : 'developer'),
+    port: parseInt(process.env[`${prefix}PORT`] || (isTest ? '5433' : '5432'), 10),
+    database: process.env[`${prefix}DATABASE`] || (isTest ? 'lumina_cms_test' : 'lumina_cms'),
+    username: process.env[`${prefix}USERNAME`] || (isTest ? 'test_developer' : 'developer'),
     password: process.env[`${prefix}PASSWORD`] || '',
   };
 }
@@ -53,11 +44,8 @@ export function getDatabaseCredentials(
  * @param isTest テスト環境かどうか
  * @returns PostgreSQL接続文字列
  */
-export function getDatabaseConnectionString(
-  isTest: boolean = false,
-): string {
-  const { host, port, database, username, password } =
-    getDatabaseCredentials(isTest);
+export function getDatabaseConnectionString(isTest: boolean = false): string {
+  const { host, port, database, username, password } = getDatabaseCredentials(isTest);
   return `postgres://${username}:${password}@${host}:${port}/${database}`;
 }
 

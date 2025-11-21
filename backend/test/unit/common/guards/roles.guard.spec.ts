@@ -160,7 +160,9 @@ describe('RolesGuard', () => {
       const context = createMockExecutionContext(user, ['admin']);
 
       // Act & Assert
-      expect(() => guard.canActivate(context)).toThrow('このリソースにアクセスする権限がありません');
+      expect(() => guard.canActivate(context)).toThrow(
+        'このリソースにアクセスする権限がありません',
+      );
     });
 
     it('memberがadminエンドポイントにアクセスできないこと', () => {

@@ -16,14 +16,7 @@ import { validationSchema } from './config/validation';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        appConfig,
-        databaseConfig,
-        authConfig,
-        serverConfig,
-        throttleConfig,
-        securityConfig,
-      ],
+      load: [appConfig, databaseConfig, authConfig, serverConfig, throttleConfig, securityConfig],
       validationSchema,
       validationOptions: {
         allowUnknown: true,

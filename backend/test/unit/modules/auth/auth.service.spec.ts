@@ -17,8 +17,6 @@ import { VerificationTokenRepository } from '../../../../src/modules/auth/reposi
  */
 describe('AuthService (Better Auth Integration)', () => {
   let service: AuthService;
-  let sessionRepository: SessionRepository;
-  let verificationTokenRepository: VerificationTokenRepository;
 
   // Mock repositories
   const mockSessionRepository = {
@@ -56,8 +54,6 @@ describe('AuthService (Better Auth Integration)', () => {
     logger.error = jest.fn();
 
     service = module.get<AuthService>(AuthService);
-    sessionRepository = module.get<SessionRepository>(SessionRepository);
-    verificationTokenRepository = module.get<VerificationTokenRepository>(VerificationTokenRepository);
   });
 
   afterEach(() => {
@@ -123,7 +119,9 @@ describe('AuthService (Better Auth Integration)', () => {
 
     it('エラー時は例外をスローすること', async () => {
       // Arrange
-      mockVerificationTokenRepository.deleteExpired.mockRejectedValueOnce(new Error('Database error'));
+      mockVerificationTokenRepository.deleteExpired.mockRejectedValueOnce(
+        new Error('Database error'),
+      );
 
       // Act & Assert
       await expect(service.cleanupExpiredVerificationTokens()).rejects.toThrow('Database error');

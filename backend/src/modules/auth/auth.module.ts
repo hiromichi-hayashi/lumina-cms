@@ -5,11 +5,11 @@ import { AuthService } from './auth.service';
 import { DrizzleModule } from '../../db/drizzle.module';
 import { DrizzleService } from '../../db/drizzle.service';
 import { createBetterAuthConfig } from './better-auth.config';
-import { CommonModule } from '../../common/common.module';
+import { AuthGuard } from '../../common/guards/auth.guard';
 import { UserRepository, SessionRepository, VerificationTokenRepository } from './repositories';
 
 @Module({
-  imports: [ConfigModule, DrizzleModule, CommonModule],
+  imports: [ConfigModule, DrizzleModule],
   controllers: [AuthController],
   providers: [
     // Repositories
@@ -19,6 +19,9 @@ import { UserRepository, SessionRepository, VerificationTokenRepository } from '
 
     // Services
     AuthService,
+
+    // Guards
+    AuthGuard,
 
     // Better Auth
     {
@@ -37,6 +40,9 @@ import { UserRepository, SessionRepository, VerificationTokenRepository } from '
 
     // Services
     AuthService,
+
+    // Guards
+    AuthGuard,
 
     // Better Auth
     'BETTER_AUTH',

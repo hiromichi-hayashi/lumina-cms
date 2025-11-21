@@ -9,11 +9,16 @@ import { createAuthClient } from 'better-auth/react';
  * - セッション管理、トークン発行、検証はバックエンドが担当
  *
  * バックエンドのBetter Auth APIエンドポイント:
- * - デフォルト: http://localhost:3001/api
+ * - デフォルト: http://localhost:3001/api/auth
  * - 環境変数で変更可能: NEXT_PUBLIC_API_URL
+ *
+ * NOTE: baseURLはバックエンドのBETTER_AUTH_BASE_PATHと一致させる必要があります
+ * バックエンド設定: BETTER_AUTH_BASE_PATH=/api/auth
  */
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL
+    ? `${process.env.NEXT_PUBLIC_API_URL}/auth`
+    : 'http://localhost:3001/api/auth',
 });
 
 /**
