@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { SessionRepository } from './repositories/session.repository';
-import { VerificationTokenRepository } from './repositories/verification-token.repository';
+import { SessionRepository } from './repositories/session';
+import { VerificationTokenRepository } from './repositories/verification-token';
 
 /**
  * 認証ヘルパーサービス

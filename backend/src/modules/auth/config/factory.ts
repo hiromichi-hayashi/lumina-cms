@@ -3,14 +3,14 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { createAuthMiddleware, APIError } from 'better-auth/api';
 import { customSession } from 'better-auth/plugins';
 import { ConfigService } from '@nestjs/config';
-import { DrizzleService } from '../../db/drizzle.service';
-import { users } from '../../db/schema';
+import { DrizzleService } from '../../../db/drizzle.service';
+import { users, sessions, accounts, verificationTokens } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { Logger } from '@nestjs/common';
-import { loginAttemptsPlugin } from './plugins/login-attempts.plugin';
-import { AuthConfig } from '../../config/auth';
-import { ServerConfig } from '../../config/server';
-import { SecurityConfig } from '../../config/security';
+import { loginAttemptsPlugin } from '../plugins/login-attempts';
+import { AuthConfig } from '../../../config/auth';
+import { ServerConfig } from '../../../config/server';
+import { SecurityConfig } from '../../../config/security';
 
 const logger = new Logger('BetterAuthConfig');
 
@@ -38,11 +38,12 @@ export function createBetterAuthConfig(
     database: drizzleAdapter(drizzleService.db, {
       provider: 'pg',
       schema: {
-        // better-authのテーブル名をカスタマイズ
-        user: 'm_users',
-        session: 's_sessions',
-        account: 's_accounts',
-        verification: 's_verification_tokens',
+        // Better Auth CLIで生成されたテーブルスキーマをマッピング
+        // テーブル名は各スキーマファイルのpgTable()で指定
+        user: users,
+        session: sessions,
+        account: accounts,
+        verification: verificationTokens,
       },
     }),
 
@@ -80,12 +81,33 @@ export function createBetterAuthConfig(
       },
     },
 
+    // accountsテーブル - Better Auth CLI標準スキーマを使用
+    // フィールドマッピング不要（account_id, provider_id列名が標準）
+    // テーブル名はschemas/accounts.tsで指定
+
     // メール・パスワード認証
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false, // 後で有効化可能
+      password: {
+        // bcryptを使用（シードスクリプトと一致させる）
+        hash: async (password: string) => {
+          logger.debug(`Hashing password`);
+          const bcrypt = await import('bcrypt');
+          return bcrypt.hash(password, securityConfig.password.bcryptRounds);
+        },
+        verify: async ({ password, hash }: { password: string; hash: string }) => {
+          logger.debug(`Verifying password. Hash exists: ${!!hash}, Hash length: ${hash?.length}`);
+          const bcrypt = await import('bcrypt');
+          const result = await bcrypt.compare(password, hash);
+          logger.debug(`Password verification result: ${result}`);
+          return result;
+        },
+      },
     },
 
+    // セッション設定 - Better Auth CLI標準スキーマを使用
+    // テーブル名はschemas/sessions.tsで指定
     session: {
       expiresIn: securityConfig.session.expiresInSeconds,
       updateAge: securityConfig.session.updateAgeSeconds,
@@ -193,7 +215,7 @@ export function createBetterAuthConfig(
 
     // APIエラーハンドリング
     onAPIError: {
-      throw: false,
+      throw: true, // エラーを適切にクライアントに返す
       onError: (error: any) => {
         // エラーログ
         logger.error(`Better Auth API Error: ${error?.message || 'Unknown error'}`);
@@ -202,9 +224,15 @@ export function createBetterAuthConfig(
 
     // セキュリティ設定
     advanced: {
-      generateId: false, // Drizzleのdefault random UUIDを使用
+      generateId: false, // スキーマのdefaultRandom()を使用
       cookiePrefix: 'lumina',
       useSecureCookies: configService.get<string>('app.nodeEnv') === 'production',
+      defaultCookieAttributes: {
+        sameSite: 'lax', // クロスサイトリクエストでの動作を改善
+        path: '/',
+        httpOnly: true,
+        secure: configService.get<string>('app.nodeEnv') === 'production',
+      },
       crossSubDomainCookies: {
         enabled: false,
       },

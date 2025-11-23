@@ -1,3 +1,3 @@
-export * from './user.repository';
-export * from './session.repository';
-export * from './verification-token.repository';
+export * from './user';
+export * from './session';
+export * from './verification-token';

@@ -22,9 +22,10 @@ export class VerificationTokenRepository extends BaseRepository<
 
   /**
    * トークンで検証トークン検索
+   * Better Auth CLIスキーマ: valueフィールド
    */
   async findByToken(token: string): Promise<VerificationToken | undefined> {
-    return this.findOne(eq(this.table.token, token));
+    return this.findOne(eq(this.table.value, token));
   }
 
   /**
@@ -42,7 +43,7 @@ export class VerificationTokenRepository extends BaseRepository<
     token: string,
   ): Promise<VerificationToken | undefined> {
     return this.findOne(
-      and(eq(this.table.identifier, identifier), eq(this.table.token, token)) as any,
+      and(eq(this.table.identifier, identifier), eq(this.table.value, token)) as any,
     );
   }
 
@@ -54,7 +55,7 @@ export class VerificationTokenRepository extends BaseRepository<
     if (!verificationToken) {
       return false;
     }
-    return verificationToken.expires > new Date();
+    return verificationToken.expiresAt > new Date();
   }
 
   /**
@@ -62,7 +63,7 @@ export class VerificationTokenRepository extends BaseRepository<
    * @returns 削除されたトークン数
    */
   async deleteExpired(): Promise<number> {
-    const deleted = await this.delete(lt(this.table.expires, new Date()));
+    const deleted = await this.delete(lt(this.table.expiresAt, new Date()));
     return deleted.length;
   }
 
@@ -78,7 +79,7 @@ export class VerificationTokenRepository extends BaseRepository<
    * トークンで削除
    */
   async deleteByToken(token: string): Promise<VerificationToken | undefined> {
-    const deleted = await this.delete(eq(this.table.token, token));
+    const deleted = await this.delete(eq(this.table.value, token));
     return deleted[0];
   }
 
@@ -90,7 +91,7 @@ export class VerificationTokenRepository extends BaseRepository<
     token: string,
   ): Promise<VerificationToken | undefined> {
     const deleted = await this.delete(
-      and(eq(this.table.identifier, identifier), eq(this.table.token, token)) as any,
+      and(eq(this.table.identifier, identifier), eq(this.table.value, token)) as any,
     );
     return deleted[0];
   }
@@ -107,7 +108,7 @@ export class VerificationTokenRepository extends BaseRepository<
     }
 
     // 期限切れチェック
-    if (verificationToken.expires < new Date()) {
+    if (verificationToken.expiresAt < new Date()) {
       // 期限切れトークンは削除
       await this.deleteByToken(token);
       return null;
@@ -131,7 +132,7 @@ export class VerificationTokenRepository extends BaseRepository<
    */
   async countValidByIdentifier(identifier: string): Promise<number> {
     const tokens = await this.findByIdentifier(identifier);
-    const validTokens = tokens.filter((token) => token.expires > new Date());
+    const validTokens = tokens.filter((token) => token.expiresAt > new Date());
     return validTokens.length;
   }
 }

@@ -15,7 +15,7 @@ import { eq } from 'drizzle-orm';
  * 機能:
  * - ログイン失敗時に試行回数をインクリメント
  * - 5回失敗でアカウントを30分間ロック
- * - ログイン成功時にリセット (already implemented in better-auth.config.ts after hook)
+ * - ログイン成功時にリセット (already implemented in factory.ts after hook)
  *
  * 制限事項:
  * - Better Authのパスワード検証は内部で行われるため、

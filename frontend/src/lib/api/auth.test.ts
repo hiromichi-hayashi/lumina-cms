@@ -10,6 +10,7 @@ global.fetch = jest.fn();
 describe('auth API client', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('signIn 関数', () => {

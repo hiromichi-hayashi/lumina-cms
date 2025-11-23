@@ -24,6 +24,16 @@
     "better-auth": {
       "type": "http",
       "url": "https://mcp.chonkie.ai/better-auth/better-auth-builder/mcp"
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://developer:password@localhost:5432/lumina_cms"
+      ],
+      "env": {}
     }
   }
 }

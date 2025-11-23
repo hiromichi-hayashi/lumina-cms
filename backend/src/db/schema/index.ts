@@ -4,7 +4,7 @@ export * from './enums';
 export * from './users';
 export * from './sessions';
 export * from './accounts';
-export * from './verificationTokens';
+export * from './verification-tokens';
 export * from './categories';
 export * from './labels';
 export * from './ngWords';

@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { CoreModule } from './core/core.module';
 import { CommonModule } from './common/common.module';
 import { DrizzleModule } from './db/drizzle.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { AuthModule } from './modules/auth/module';
 import appConfig from './config/app';
 import databaseConfig from './config/database';
 import authConfig from './config/auth';
@@ -32,6 +33,7 @@ import { validationSchema } from './config/validation';
         },
       ],
     }),
+    CoreModule, // アプリケーション基盤サービス（Better Auth等）
     CommonModule,
     DrizzleModule,
     AuthModule,

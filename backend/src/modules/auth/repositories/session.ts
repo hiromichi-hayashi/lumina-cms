@@ -18,9 +18,10 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
 
   /**
    * セッショントークンでセッション検索
+   * Better Auth CLIスキーマ: tokenフィールド
    */
   async findByToken(sessionToken: string): Promise<Session | undefined> {
-    return this.findOne(eq(this.table.sessionToken, sessionToken));
+    return this.findOne(eq(this.table.token, sessionToken));
   }
 
   /**
@@ -35,7 +36,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    */
   async findActiveByUserId(userId: string): Promise<Session[]> {
     return this.findMany(
-      and(eq(this.table.userId, userId), gt(this.table.expires, new Date())) as any,
+      and(eq(this.table.userId, userId), gt(this.table.expiresAt, new Date())) as any,
     );
   }
 
@@ -44,7 +45,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * @returns 削除されたセッション数
    */
   async deleteExpired(): Promise<number> {
-    const deleted = await this.delete(lt(this.table.expires, new Date()));
+    const deleted = await this.delete(lt(this.table.expiresAt, new Date()));
     return deleted.length;
   }
 
@@ -60,7 +61,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * セッショントークンでセッション削除
    */
   async deleteByToken(sessionToken: string): Promise<Session | undefined> {
-    const deleted = await this.delete(eq(this.table.sessionToken, sessionToken));
+    const deleted = await this.delete(eq(this.table.token, sessionToken));
     return deleted[0];
   }
 
@@ -68,7 +69,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * アクティブなセッション数をカウント
    */
   async countActive(): Promise<number> {
-    return this.count(gt(this.table.expires, new Date()));
+    return this.count(gt(this.table.expiresAt, new Date()));
   }
 
   /**
@@ -76,7 +77,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    */
   async countActiveByUserId(userId: string): Promise<number> {
     return this.count(
-      and(eq(this.table.userId, userId), gt(this.table.expires, new Date())) as any,
+      and(eq(this.table.userId, userId), gt(this.table.expiresAt, new Date())) as any,
     );
   }
 
@@ -88,7 +89,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
     if (!session) {
       return false;
     }
-    return session.expires > new Date();
+    return session.expiresAt > new Date();
   }
 
   /**
@@ -99,8 +100,8 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
     if (!session) {
       return undefined;
     }
-    const updated = await this.update(eq(this.table.sessionToken, sessionToken), {
-      expires: expiresAt,
+    const updated = await this.update(eq(this.table.token, sessionToken), {
+      expiresAt: expiresAt,
     });
     return updated[0];
   }

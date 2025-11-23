@@ -28,25 +28,39 @@ export function useAuth() {
    * メール+パスワードでサインイン
    */
   const signIn = async (email: string, password: string) => {
-    const response = await authClient.signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onError: (ctx) => {
-          // エラーハンドリング
-          console.error('Sign in error:', ctx.error);
-          throw new Error(ctx.error.message || 'サインインに失敗しました');
+    try {
+      const response = await authClient.signIn.email(
+        {
+          email,
+          password,
         },
-      },
-    );
+        {
+          onError: (ctx) => {
+            // エラーハンドリング
+            console.error('Sign in error:', ctx.error);
+          },
+        },
+      );
 
-    if (response.error) {
-      throw new Error(response.error.message || 'サインインに失敗しました');
+      // エラーチェック
+      if (response.error) {
+        const errorMessage = response.error.message || 'サインインに失敗しました';
+        throw new Error(errorMessage);
+      }
+
+      // データの存在確認
+      if (!response.data) {
+        throw new Error('サインインに失敗しました');
+      }
+
+      return response.data;
+    } catch (error) {
+      // エラーを適切に再スロー
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('サインインに失敗しました');
     }
-
-    return response.data;
   };
 
   /**
@@ -81,7 +95,7 @@ export function useAuth() {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push('/sign-in');
+          router.push('/login');
         },
         onError: (ctx) => {
           console.error('Sign out error:', ctx.error);

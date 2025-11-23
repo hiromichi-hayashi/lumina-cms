@@ -1,32 +1,30 @@
-import { pgTable, serial, uuid, varchar, text, integer, timestamp } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, index, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 
-export const accounts = pgTable('s_accounts', {
-  id: serial('id').primaryKey(),
-  userId: uuid('user_id')
-    .references(() => users.id, { onDelete: 'cascade' })
-    .notNull(),
-  type: varchar('type', { length: 50 }).notNull(),
-  provider: varchar('provider', { length: 100 }).notNull(),
-  providerAccountId: varchar('provider_account_id', { length: 255 }).notNull(),
-  refreshToken: text('refresh_token'),
-  accessToken: text('access_token'),
-  expiresAt: integer('expires_at'),
-  tokenType: varchar('token_type', { length: 50 }),
-  scope: text('scope'),
-  idToken: text('id_token'),
-  sessionState: text('session_state'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+export const accounts = pgTable(
+  's_accounts',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    accountId: text('account_id').notNull(),
+    providerId: text('provider_id').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    password: text('password'),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    idToken: text('id_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at'),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+    scope: text('scope'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index('account_userId_idx').on(table.userId)],
+);
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, {
-    fields: [accounts.userId],
-    references: [users.id],
-  }),
-}));
-
+// 型定義
 export type Account = typeof accounts.$inferSelect;
 export type NewAccount = typeof accounts.$inferInsert;

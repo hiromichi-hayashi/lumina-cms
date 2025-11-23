@@ -112,7 +112,13 @@ export function LoginForm() {
       </div>
 
       {/* ログインボタン */}
-      <Button type="submit" className="w-full" disabled={isLoading} aria-busy={isLoading}>
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isLoading}
+        aria-busy={isLoading}
+        data-testid="login-submit-button"
+      >
         {isLoading ? 'ログイン中...' : 'ログイン'}
       </Button>
 

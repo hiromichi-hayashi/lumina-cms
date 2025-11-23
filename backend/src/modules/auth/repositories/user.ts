@@ -109,7 +109,7 @@ export class UserRepository extends BaseRepository<typeof users, User, NewUser> 
    */
   async markEmailAsVerified(userId: string): Promise<User | undefined> {
     return this.updateById(userId, {
-      emailVerified: new Date(),
+      emailVerified: true,
     });
   }
 

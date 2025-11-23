@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../../../../src/modules/auth/auth.service';
-import { SessionRepository } from '../../../../src/modules/auth/repositories/session.repository';
-import { VerificationTokenRepository } from '../../../../src/modules/auth/repositories/verification-token.repository';
+import { AuthService } from '../../../../src/modules/auth/service';
+import { SessionRepository } from '../../../../src/modules/auth/repositories/session';
+import { VerificationTokenRepository } from '../../../../src/modules/auth/repositories/verification-token';
 
 /**
  * AuthService ユニットテスト (Better Auth統合版 + Repository Pattern)

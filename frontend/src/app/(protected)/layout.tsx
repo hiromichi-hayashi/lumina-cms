@@ -1,3 +1,5 @@
+import { LogoutButton } from '@/components/auth/LogoutButton';
+
 /**
  * 認証必須ページ用レイアウト
  *
@@ -10,7 +12,12 @@
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* 将来的にサイドバー、ナビゲーション等を追加 */}
+      <header className="border-b bg-white">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <h1 className="text-xl font-bold">Lumina CMS</h1>
+          <LogoutButton />
+        </div>
+      </header>
       <main className="container mx-auto p-4">{children}</main>
     </div>
   );

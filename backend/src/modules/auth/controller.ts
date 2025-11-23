@@ -8,7 +8,7 @@ import { toNodeHandler } from 'better-auth/node';
  *
  * すべての認証リクエスト (/api/auth/*) をBetter Authのハンドラーに委譲します。
  * カスタムビジネスロジック（アカウントロック、ログイン試行管理等）は
- * better-auth.config.tsのフック機能で実装されています。
+ * factory.tsのフック機能で実装されています。
  *
  * NOTE: NestJSの@Controller('auth')とグローバルプレフィックス'/api'により、
  * このコントローラーは /api/auth/* でアクセス可能になります。
