@@ -46,6 +46,8 @@ describe('useAuth', () => {
       data: null,
       isPending: false,
       error: null,
+      isRefetching: false,
+      refetch: jest.fn(),
     });
   });
 
@@ -55,6 +57,8 @@ describe('useAuth', () => {
         data: null,
         isPending: true, // loading状態
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       const { result } = renderHook(() => useAuth());
@@ -65,17 +69,33 @@ describe('useAuth', () => {
 
     it('セッション取得成功: セッション取得成功時にユーザー情報が設定されること', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         name: 'Test User',
         role: 'member',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+      };
+
+      const mockSession = {
+        id: 'session-1',
+        userId: '1',
+        expiresAt: new Date(Date.now() + 86400000), // 24時間後
+        token: 'test-session-token',
+        ipAddress: '127.0.0.1',
+        userAgent: 'test-agent',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       mockUseSession.mockReturnValue({
-        data: { user: mockUser },
+        data: { user: mockUser, session: mockSession },
         isPending: false,
         error: null,
-      });
+        isRefetching: false,
+        refetch: jest.fn(),
+      } as ReturnType<typeof authClient.useSession>);
 
       const { result } = renderHook(() => useAuth());
 
@@ -89,6 +109,8 @@ describe('useAuth', () => {
         data: null,
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       const { result } = renderHook(() => useAuth());
@@ -99,12 +121,18 @@ describe('useAuth', () => {
     });
 
     it('セッション取得エラー: セッション取得時のエラーハンドリングが正しいこと', async () => {
-      const mockError = new Error('Network error');
+      const mockError = {
+        status: 500,
+        statusText: 'Internal Server Error',
+        error: new Error('Network error'),
+      };
 
       mockUseSession.mockReturnValue({
         data: null,
         isPending: false,
         error: mockError,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       const { result } = renderHook(() => useAuth());
@@ -119,16 +147,21 @@ describe('useAuth', () => {
   describe('サインイン', () => {
     it('サインイン成功: サインイン成功時にユーザー情報が設定されること', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         name: 'Test User',
         role: 'member',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
       };
 
       mockUseSession.mockReturnValue({
         data: null,
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       mockSignInEmail.mockResolvedValue({
@@ -158,6 +191,8 @@ describe('useAuth', () => {
         data: null,
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       mockSignInEmail.mockResolvedValue({
@@ -178,22 +213,30 @@ describe('useAuth', () => {
   describe('サインアウト', () => {
     it('サインアウト成功: サインアウト成功時にuser=nullになること', async () => {
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         name: 'Test User',
         role: 'member',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
       };
 
       mockUseSession.mockReturnValue({
         data: { user: mockUser },
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       // signOutをモックして、fetchOptionsのonSuccessを呼び出す
-      mockSignOut.mockImplementation(async (options?: { fetchOptions?: { onSuccess?: () => void } }) => {
+      mockSignOut.mockImplementation(async (...args: Parameters<typeof mockSignOut>) => {
+        const options = args[0];
         if (options?.fetchOptions?.onSuccess) {
-          options.fetchOptions.onSuccess();
+          options.fetchOptions.onSuccess(
+            {} as Parameters<NonNullable<typeof options.fetchOptions.onSuccess>>[0],
+          );
         }
       });
 
@@ -214,16 +257,21 @@ describe('useAuth', () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const mockUser = {
-        id: 1,
+        id: '1',
         email: 'test@example.com',
         name: 'Test User',
         role: 'member',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
       };
 
       mockUseSession.mockReturnValue({
         data: { user: mockUser },
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       // signOutがエラーを投げるようにモック
@@ -246,14 +294,19 @@ describe('useAuth', () => {
       mockUseSession.mockReturnValue({
         data: {
           user: {
-            id: 1,
+            id: '1',
             email: 'admin@example.com',
             name: 'Admin User',
             role: 'admin',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            emailVerified: true,
           },
         },
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       const { result } = renderHook(() => useAuth());
@@ -267,14 +320,19 @@ describe('useAuth', () => {
       mockUseSession.mockReturnValue({
         data: {
           user: {
-            id: 1,
+            id: '1',
             email: 'member@example.com',
             name: 'Member User',
             role: 'member',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            emailVerified: true,
           },
         },
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       const { result } = renderHook(() => useAuth());
@@ -289,6 +347,8 @@ describe('useAuth', () => {
         data: null,
         isPending: false,
         error: null,
+        isRefetching: false,
+        refetch: jest.fn(),
       });
 
       const { result } = renderHook(() => useAuth());
