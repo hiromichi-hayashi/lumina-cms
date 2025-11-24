@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../../common/repositories/base.repository';
+import { BaseRepository } from '../../../common/repositories/base';
 import { DrizzleService } from '../../../db/drizzle.service';
 import { sessions, Session, NewSession } from '../../../db/schema';
 import { eq, lt, gt, and } from 'drizzle-orm';
@@ -35,6 +35,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * ユーザーIDでアクティブなセッション取得
    */
   async findActiveByUserId(userId: string): Promise<Session[]> {
+    // Drizzle ORMの型制約: and()の戻り値型がSQL型と互換性がないため`as any`が必要
     return this.findMany(
       and(eq(this.table.userId, userId), gt(this.table.expiresAt, new Date())) as any,
     );
@@ -76,6 +77,7 @@ export class SessionRepository extends BaseRepository<typeof sessions, Session, 
    * ユーザーのアクティブセッション数をカウント
    */
   async countActiveByUserId(userId: string): Promise<number> {
+    // Drizzle ORMの型制約: and()の戻り値型がSQL型と互換性がないため`as any`が必要
     return this.count(
       and(eq(this.table.userId, userId), gt(this.table.expiresAt, new Date())) as any,
     );

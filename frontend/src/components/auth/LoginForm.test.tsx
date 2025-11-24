@@ -178,6 +178,34 @@ describe('LoginForm', () => {
       });
     });
 
+    it('callbackUrl指定時: callbackUrlパラメータが指定されている場合、そのURLにリダイレクトすること', async () => {
+      const user = userEvent.setup();
+      mockSignIn.mockResolvedValue({
+        user: { id: 1, email: 'test@example.com', name: 'Test', role: 'member' },
+      });
+
+      // callbackUrlパラメータを設定
+      mockSearchParams.set('callbackUrl', '/posts/123');
+
+      render(<LoginForm />);
+
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const passwordInput = screen.getByLabelText(/パスワード/i);
+      const submitButton = screen.getByRole('button', { name: /^ログイン$/i });
+
+      await user.type(emailInput, 'test@example.com');
+      await user.type(passwordInput, 'Password123');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'Password123');
+        expect(mockPush).toHaveBeenCalledWith('/posts/123');
+      });
+
+      // テスト後にクリーンアップ
+      mockSearchParams.delete('callbackUrl');
+    });
+
     it('ログイン失敗: 認証エラー時にエラーメッセージが表示されること', async () => {
       const user = userEvent.setup();
       mockSignIn.mockRejectedValue(new Error('メールアドレスまたはパスワードが正しくありません'));

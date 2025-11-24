@@ -180,7 +180,13 @@ export function createBetterAuthConfig(
           return;
         }
 
-        const returned = ctx.context.returned as any;
+        // Better Auth sign-in response interface
+        interface SignInResponse {
+          user?: { id: string };
+          session?: unknown;
+        }
+
+        const returned = ctx.context.returned as SignInResponse;
         const user = returned?.user;
 
         if (user?.id) {
@@ -216,7 +222,7 @@ export function createBetterAuthConfig(
     // APIエラーハンドリング
     onAPIError: {
       throw: true, // エラーを適切にクライアントに返す
-      onError: (error: any) => {
+      onError: (error: Error | APIError) => {
         // エラーログ
         logger.error(`Better Auth API Error: ${error?.message || 'Unknown error'}`);
       },

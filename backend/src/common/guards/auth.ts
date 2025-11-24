@@ -7,6 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { Request } from 'express';
+import type { betterAuth } from 'better-auth';
 
 /**
  * Better Auth統合 認証ガード
@@ -29,7 +30,7 @@ import { Request } from 'express';
 export class AuthGuard implements CanActivate {
   private readonly logger = new Logger(AuthGuard.name);
 
-  constructor(@Inject('BETTER_AUTH') private readonly auth: any) {}
+  constructor(@Inject('BETTER_AUTH') private readonly auth: ReturnType<typeof betterAuth>) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
@@ -37,8 +38,16 @@ export class AuthGuard implements CanActivate {
     try {
       // Better AuthのセッションAPIを使用してセッションを取得
       // Better Authは自動的にCookieからセッショントークンを読み取ります
+      // IncomingHttpHeadersをHeaders形式に変換
+      const headers = new Headers();
+      Object.entries(request.headers).forEach(([key, value]) => {
+        if (value) {
+          headers.set(key, Array.isArray(value) ? value[0] : value);
+        }
+      });
+
       const session = await this.auth.api.getSession({
-        headers: request.headers,
+        headers,
       });
 
       if (!session || !session.user) {
@@ -48,8 +57,9 @@ export class AuthGuard implements CanActivate {
 
       // リクエストオブジェクトにユーザー情報を追加
       // Better Authのユーザーオブジェクトをそのまま使用
-      (request as any).user = session.user;
-      (request as any).session = session.session;
+      // 型定義は /src/types/express.d.ts を参照
+      request.user = session.user;
+      request.session = session.session;
 
       this.logger.debug(`User ${session.user.id} authenticated via Better Auth`);
 

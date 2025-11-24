@@ -14,6 +14,7 @@ jest.mock('@/hooks/useAuth', () => ({
 
 // next/navigation のモック
 const mockPush = jest.fn();
+const mockPathname = '/posts/123';
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
@@ -21,6 +22,7 @@ jest.mock('next/navigation', () => ({
     prefetch: jest.fn(),
     back: jest.fn(),
   }),
+  usePathname: () => mockPathname,
 }));
 
 describe('AuthGuard', () => {
@@ -29,7 +31,7 @@ describe('AuthGuard', () => {
   });
 
   describe('認証チェック', () => {
-    it('未認証時のリダイレクト: 未認証時に/loginへリダイレクトされること', async () => {
+    it('未認証時のリダイレクト: 未認証時にcallbackUrlパラメータ付きで/loginへリダイレクトされること', async () => {
       (useAuthHook.useAuth as jest.Mock).mockReturnValue({
         user: null,
         loading: false,
@@ -47,7 +49,7 @@ describe('AuthGuard', () => {
       );
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/login');
+        expect(mockPush).toHaveBeenCalledWith('/login?callbackUrl=%2Fposts%2F123');
       });
 
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { CoreModule } from './core/core.module';
-import { CommonModule } from './common/common.module';
+import { CoreModule } from './core/module';
+import { CommonModule } from './common/module';
 import { DrizzleModule } from './db/drizzle.module';
 import { AuthModule } from './modules/auth/module';
 import appConfig from './config/app';

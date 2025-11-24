@@ -9,7 +9,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import type { UserRole } from '@/lib/auth/types';
 
@@ -21,10 +21,11 @@ interface AuthGuardProps {
 export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
     }
 
     // ロールチェック
@@ -35,7 +36,7 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
         router.push('/dashboard'); // 権限不足時のリダイレクト
       }
     }
-  }, [user, loading, requiredRole, router]);
+  }, [user, loading, requiredRole, router, pathname]);
 
   if (loading) {
     return (

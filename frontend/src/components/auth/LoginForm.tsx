@@ -45,7 +45,7 @@ export function LoginForm() {
 
     try {
       await signIn(data.email, data.password);
-      const redirect = searchParams.get('redirect') || '/dashboard';
+      const redirect = searchParams.get('callbackUrl') || '/dashboard';
       router.push(redirect);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ログインに失敗しました');

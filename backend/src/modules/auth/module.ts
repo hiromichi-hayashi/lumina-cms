@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './controller';
 import { AuthService } from './service';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { AuthGuard } from '../../common/guards/auth';
 import { UserRepository, SessionRepository, VerificationTokenRepository } from './repositories';
 
 /**

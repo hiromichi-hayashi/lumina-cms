@@ -39,8 +39,13 @@ export const loginAttemptsPlugin = (
           },
           handler: createAuthMiddleware(async (ctx) => {
             try {
+              // Better Auth error response interface
+              interface AuthErrorResponse {
+                error?: unknown;
+              }
+
               // レスポンスを確認してログイン失敗を検出
-              const response = ctx.context.returned as any;
+              const response = ctx.context.returned as AuthErrorResponse;
 
               // ログイン失敗の場合（エラーレスポンス）
               if (response && response.error) {

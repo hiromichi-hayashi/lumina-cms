@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../../common/repositories/base.repository';
+import { BaseRepository } from '../../../common/repositories/base';
 import { DrizzleService } from '../../../db/drizzle.service';
 import { verificationTokens, VerificationToken, NewVerificationToken } from '../../../db/schema';
 import { eq, lt, and } from 'drizzle-orm';
@@ -42,6 +42,7 @@ export class VerificationTokenRepository extends BaseRepository<
     identifier: string,
     token: string,
   ): Promise<VerificationToken | undefined> {
+    // Drizzle ORMの型制約: and()の戻り値型がSQL型と互換性がないため`as any`が必要
     return this.findOne(
       and(eq(this.table.identifier, identifier), eq(this.table.value, token)) as any,
     );
@@ -90,6 +91,7 @@ export class VerificationTokenRepository extends BaseRepository<
     identifier: string,
     token: string,
   ): Promise<VerificationToken | undefined> {
+    // Drizzle ORMの型制約: and()の戻り値型がSQL型と互換性がないため`as any`が必要
     const deleted = await this.delete(
       and(eq(this.table.identifier, identifier), eq(this.table.value, token)) as any,
     );

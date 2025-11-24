@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '../../../common/repositories/base.repository';
+import { BaseRepository } from '../../../common/repositories/base';
 import { DrizzleService } from '../../../db/drizzle.service';
 import { users, User, NewUser } from '../../../db/schema';
 import { eq, and, isNull, not, gt } from 'drizzle-orm';
@@ -42,6 +42,7 @@ export class UserRepository extends BaseRepository<typeof users, User, NewUser> 
    * lockedUntilが現在時刻より未来のユーザーを返す
    */
   async findLockedUsers(): Promise<User[]> {
+    // Drizzle ORMの型制約: and()の戻り値型がSQL型と互換性がないため`as any`が必要
     return this.findMany(
       and(not(isNull(this.table.lockedUntil)), gt(this.table.lockedUntil, new Date())) as any,
     );

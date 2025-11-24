@@ -12,6 +12,7 @@ export const comments = pgTable('t_comments', {
     .notNull()
     .references(() => blogPosts.id, { onDelete: 'cascade' }),
   userId: uuid('user_id').references(() => users.id),
+  // Drizzle ORMの型制約: 自己参照のため`(): any`が必要（循環参照の制約）
   parentId: integer('parent_id').references((): any => comments.id, { onDelete: 'cascade' }), // 返信の場合
   authorName: varchar('author_name', { length: 100 }).notNull(),
   authorEmail: varchar('author_email', { length: 255 }),

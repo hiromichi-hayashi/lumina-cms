@@ -2,8 +2,8 @@ import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { RolesGuard } from '../../../../src/common/guards/roles.guard';
-import { ROLES_KEY } from '../../../../src/common/decorators/roles.decorator';
+import { RolesGuard } from '../../../../src/common/guards/roles';
+import { ROLES_KEY } from '../../../../src/common/decorators/roles';
 
 // Type for test user
 type TestUser = {

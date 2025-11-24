@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { DrizzleModule } from '../../src/db/drizzle.module';
 import { DrizzleService } from '../../src/db/drizzle.service';
-import { CoreModule } from '../../src/core/core.module';
+import { CoreModule } from '../../src/core/module';
 import { AuthModule } from '../../src/modules/auth/module';
 import { users, accounts, sessions } from '../../src/db/schema';
 import appConfig from '../../src/config/app';

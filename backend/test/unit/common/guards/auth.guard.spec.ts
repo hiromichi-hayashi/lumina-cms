@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { AuthGuard } from '../../../../src/common/guards/auth.guard';
+import { AuthGuard } from '../../../../src/common/guards/auth';
 
 /**
  * AuthGuard ユニットテスト (Better Auth統合版)
@@ -102,9 +102,11 @@ describe('AuthGuard (Better Auth Integration)', () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(mockBetterAuth.api.getSession).toHaveBeenCalledWith({
-        headers: context.switchToHttp().getRequest().headers,
-      });
+      expect(mockBetterAuth.api.getSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.any(Headers),
+        }),
+      );
     });
 
     it('canActivate()がtrueを返すこと', async () => {

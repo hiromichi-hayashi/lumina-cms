@@ -2,6 +2,7 @@ import { All, Controller, Req, Res, Inject, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
+import type { betterAuth } from 'better-auth';
 
 /**
  * Better Auth統合コントローラー
@@ -20,7 +21,7 @@ export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   private readonly handler: ReturnType<typeof toNodeHandler>;
 
-  constructor(@Inject('BETTER_AUTH') private readonly auth: any) {
+  constructor(@Inject('BETTER_AUTH') private readonly auth: ReturnType<typeof betterAuth>) {
     this.logger.log('Better Auth handler initialized');
     // Better AuthのtoNodeHandlerを使用してExpressハンドラーを作成
     this.handler = toNodeHandler(this.auth);

@@ -31,6 +31,7 @@ export abstract class BaseRepository<
    * 全レコード取得
    */
   async findAll(): Promise<TSelect[]> {
+    // Drizzle ORMの型制約により`as any`が必要: PgTableは汎用的な`.from()`に直接渡せない
     return (await this.db.select().from(this.table as any)) as TSelect[];
   }
 
@@ -38,6 +39,7 @@ export abstract class BaseRepository<
    * 条件に一致する複数レコード取得
    */
   async findMany(where: SQL): Promise<TSelect[]> {
+    // Drizzle ORMの型制約により`as any`が必要
     return (await this.db
       .select()
       .from(this.table as any)
@@ -48,6 +50,7 @@ export abstract class BaseRepository<
    * 条件に一致する単一レコード取得
    */
   async findOne(where: SQL): Promise<TSelect | undefined> {
+    // Drizzle ORMの型制約により`as any`が必要
     const result = await this.db
       .select()
       .from(this.table as any)
@@ -63,6 +66,7 @@ export abstract class BaseRepository<
    */
   async findById(
     id: string,
+    // Drizzle ORMの型制約: デフォルト値に'id'を指定するため`as any`が必要
     idColumn: keyof TTable['_']['columns'] = 'id' as any,
   ): Promise<TSelect | undefined> {
     const column = this.table[idColumn as string];
@@ -73,6 +77,7 @@ export abstract class BaseRepository<
    * 新規レコード作成
    */
   async create(data: TInsert): Promise<TSelect> {
+    // Drizzle ORMの型制約: ジェネリック型TInsertを.values()に渡すため`as any`が必要
     const result = await this.db
       .insert(this.table)
       .values(data as any)
@@ -84,6 +89,7 @@ export abstract class BaseRepository<
    * 複数レコード一括作成
    */
   async createMany(data: TInsert[]): Promise<TSelect[]> {
+    // Drizzle ORMの型制約: ジェネリック型TInsert[]を.values()に渡すため`as any[]`が必要
     const result = await this.db
       .insert(this.table)
       .values(data as any[])
@@ -95,6 +101,7 @@ export abstract class BaseRepository<
    * レコード更新
    */
   async update(where: SQL, data: Partial<TInsert>): Promise<TSelect[]> {
+    // Drizzle ORMの型制約: ジェネリック型Partial<TInsert>を.set()に渡すため`as any`が必要
     const result = await this.db
       .update(this.table)
       .set(data as any)
@@ -109,6 +116,7 @@ export abstract class BaseRepository<
   async updateById(
     id: string,
     data: Partial<TInsert>,
+    // Drizzle ORMの型制約: デフォルト値に'id'を指定するため`as any`が必要
     idColumn: keyof TTable['_']['columns'] = 'id' as any,
   ): Promise<TSelect | undefined> {
     const column = this.table[idColumn as string];
@@ -129,6 +137,7 @@ export abstract class BaseRepository<
    */
   async deleteById(
     id: string,
+    // Drizzle ORMの型制約: デフォルト値に'id'を指定するため`as any`が必要
     idColumn: keyof TTable['_']['columns'] = 'id' as any,
   ): Promise<TSelect | undefined> {
     const column = this.table[idColumn as string];
@@ -148,6 +157,7 @@ export abstract class BaseRepository<
    * レコード数カウント
    */
   async count(where?: SQL): Promise<number> {
+    // Drizzle ORMの型制約により`as any`が必要
     const query = where
       ? this.db
           .select()

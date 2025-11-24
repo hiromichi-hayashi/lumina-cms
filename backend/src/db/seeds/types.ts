@@ -6,7 +6,7 @@ import * as schema from '../schema';
  */
 export type SeederFunction = (
   db: PostgresJsDatabase<typeof schema>,
-  ...args: any[]
+  ...args: unknown[]
 ) => Promise<void>;
 
 /**
