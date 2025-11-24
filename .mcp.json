@@ -1,0 +1,39 @@
+{
+  "mcpServers": {
+    "serena": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server",
+        "--project",
+        "/Users/hh-pd09/Project/lumina-cms"
+      ],
+      "env": {}
+    },
+    "codex": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "codex-mcp@latest"
+      ],
+      "env": {}
+    },
+    "better-auth": {
+      "type": "http",
+      "url": "https://mcp.chonkie.ai/better-auth/better-auth-builder/mcp"
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://developer:password@localhost:5432/lumina_cms"
+      ],
+      "env": {}
+    }
+  }
+}

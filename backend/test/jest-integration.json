@@ -1,0 +1,17 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testMatch": ["**/integration/**/*.integration-spec.ts"],
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(better-auth|@better-auth|jose|oauth4webapi|@noble)/)"
+  ],
+  "setupFilesAfterEnv": ["<rootDir>/setup-integration.ts"],
+  "testTimeout": 30000,
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/../src/$1"
+  }
+}
