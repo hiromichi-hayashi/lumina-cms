@@ -84,7 +84,7 @@ export default registerAs('server', (): ServerConfig => {
 
     // Swagger設定
     swagger: {
-      enabled: process.env.SWAGGER_ENABLED === 'true',
+      enabled: process.env.SWAGGER_ENABLED !== 'false',
       title: process.env.SWAGGER_TITLE || 'Lumina CMS API',
       description: process.env.SWAGGER_DESCRIPTION || 'Enterprise Content Management System API',
       version: process.env.SWAGGER_VERSION || '1.0',
