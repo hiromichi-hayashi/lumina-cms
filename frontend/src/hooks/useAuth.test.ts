@@ -5,6 +5,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useAuth } from './useAuth';
 import { authClient } from '@/lib/auth/client';
+import type { UserWithRole } from '@/lib/auth/types';
 
 // Better Auth クライアントのモック
 jest.mock('@/lib/auth/client', () => ({
@@ -125,6 +126,8 @@ describe('useAuth', () => {
         status: 500,
         statusText: 'Internal Server Error',
         error: new Error('Network error'),
+        name: 'BetterFetchError',
+        message: 'Internal Server Error',
       };
 
       mockUseSession.mockReturnValue({
@@ -165,7 +168,17 @@ describe('useAuth', () => {
       });
 
       mockSignInEmail.mockResolvedValue({
-        data: { user: mockUser },
+        data: {
+          user: mockUser,
+          session: {
+            id: 'session-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: mockUser.id,
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+            token: 'test-token',
+          },
+        },
         error: null,
       });
 
@@ -183,7 +196,14 @@ describe('useAuth', () => {
         },
         expect.any(Object),
       );
-      expect(signInResult).toEqual({ user: mockUser });
+      expect(signInResult).toEqual({
+        user: mockUser,
+        session: expect.objectContaining({
+          id: expect.any(String),
+          userId: mockUser.id,
+          token: expect.any(String),
+        }),
+      });
     });
 
     it('サインイン失敗: サインイン失敗時に例外がスローされること', async () => {
@@ -197,7 +217,7 @@ describe('useAuth', () => {
 
       mockSignInEmail.mockResolvedValue({
         data: null,
-        error: { message: 'Invalid credentials' },
+        error: { code: 'INVALID_EMAIL_OR_PASSWORD', message: 'Invalid email or password' },
       });
 
       const { result } = renderHook(() => useAuth());
@@ -206,7 +226,7 @@ describe('useAuth', () => {
         act(async () => {
           await result.current.signIn('test@example.com', 'WrongPassword');
         }),
-      ).rejects.toThrow('Invalid credentials');
+      ).rejects.toThrow('メールアドレスまたはパスワードが正しくありません');
     });
   });
 
@@ -223,7 +243,17 @@ describe('useAuth', () => {
       };
 
       mockUseSession.mockReturnValue({
-        data: { user: mockUser },
+        data: {
+          user: mockUser,
+          session: {
+            id: 'session-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: mockUser.id,
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+            token: 'test-token',
+          },
+        },
         isPending: false,
         error: null,
         isRefetching: false,
@@ -267,7 +297,17 @@ describe('useAuth', () => {
       };
 
       mockUseSession.mockReturnValue({
-        data: { user: mockUser },
+        data: {
+          user: mockUser,
+          session: {
+            id: 'session-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: mockUser.id,
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+            token: 'test-token',
+          },
+        },
         isPending: false,
         error: null,
         isRefetching: false,
@@ -301,6 +341,14 @@ describe('useAuth', () => {
             createdAt: new Date(),
             updatedAt: new Date(),
             emailVerified: true,
+          } as UserWithRole,
+          session: {
+            id: 'session-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: '1',
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            token: 'test-token',
           },
         },
         isPending: false,
@@ -327,6 +375,14 @@ describe('useAuth', () => {
             createdAt: new Date(),
             updatedAt: new Date(),
             emailVerified: true,
+          } as UserWithRole,
+          session: {
+            id: 'session-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: '1',
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            token: 'test-token',
           },
         },
         isPending: false,

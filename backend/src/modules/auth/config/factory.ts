@@ -7,7 +7,6 @@ import { DrizzleService } from '../../../db/drizzle.service';
 import { users, sessions, accounts, verificationTokens } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { Logger } from '@nestjs/common';
-import { loginAttemptsPlugin } from '../plugins/login-attempts';
 import { AuthConfig } from '../../../config/auth';
 import { ServerConfig } from '../../../config/server';
 import { SecurityConfig } from '../../../config/security';
@@ -132,15 +131,12 @@ export function createBetterAuthConfig(
     },
 
     // プラグイン設定
-    plugins: [
-      // ログイン試行回数管理プラグイン
-      loginAttemptsPlugin(drizzleService, configService),
-    ],
+    plugins: [],
 
     // カスタムフック - ビジネスロジックの実装
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
-        // サインイン前: アカウントロックチェック
+        // サインイン前: アカウントロックチェックとログイン試行記録
         if (ctx.path !== '/sign-in/email') {
           return;
         }
@@ -166,12 +162,68 @@ export function createBetterAuthConfig(
         }
 
         // アカウントロックチェック
-        if (user.lockedUntil && user.lockedUntil > new Date()) {
+        const now = new Date();
+        if (user.lockedUntil && user.lockedUntil > now) {
+          // まだロック期間中
           const lockMessage = `一定回数以上ログインに失敗したためロックされています（解除: ${user.lockedUntil.toLocaleString('ja-JP')})`;
           logger.warn(`Login attempt for locked account: ${user.id}`);
           throw new APIError('UNAUTHORIZED', {
             message: lockMessage,
           });
+        }
+
+        // ロック期限が過ぎている場合、試行回数とロック時刻をリセット
+        let currentAttempts = user.loginAttempts ?? 0;
+        if (user.lockedUntil && user.lockedUntil <= now) {
+          await drizzleService.db
+            .update(users)
+            .set({
+              loginAttempts: 0,
+              lockedUntil: null,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          currentAttempts = 0;
+          logger.log(`[LoginAttempts] Lock expired for user ${email}, reset attempts`);
+        }
+
+        // ログイン試行を記録（成功・失敗に関わらず）
+        // after フックで成功時にリセット、失敗時はそのまま残る
+        const newAttempts = currentAttempts + 1;
+
+        // 最大試行回数を超えた場合ロック
+        if (newAttempts >= securityConfig.accountLock.maxLoginAttempts) {
+          const lockDuration = securityConfig.accountLock.lockDurationMinutes * 60 * 1000;
+          const lockedUntil = new Date(Date.now() + lockDuration);
+
+          await drizzleService.db
+            .update(users)
+            .set({
+              loginAttempts: newAttempts,
+              lockedUntil,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          logger.log(`[LoginAttempts] User ${email} locked until ${lockedUntil.toISOString()}`);
+
+          throw new APIError('UNAUTHORIZED', {
+            message: `一定回数以上ログインに失敗したためロックされています（解除: ${lockedUntil.toLocaleString('ja-JP')})`,
+          });
+        } else {
+          // 試行回数のみ更新
+          await drizzleService.db
+            .update(users)
+            .set({
+              loginAttempts: newAttempts,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          logger.log(
+            `[LoginAttempts] User ${email} login attempts: ${newAttempts}/${securityConfig.accountLock.maxLoginAttempts}`,
+          );
         }
       }),
       after: createAuthMiddleware(async (ctx) => {

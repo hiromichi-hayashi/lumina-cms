@@ -84,7 +84,7 @@ export default registerAs('security', (): SecurityConfig => {
     // アカウントロック
     accountLock: {
       maxLoginAttempts: 5,
-      lockDurationMinutes: 30,
+      lockDurationMinutes: 3,
     },
 
     // セッション

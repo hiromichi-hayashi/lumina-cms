@@ -15,6 +15,7 @@
 
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth/client';
+import { getErrorMessage, errorMessages } from '@/lib/auth/error-messages';
 import type { UserRole } from '@/lib/auth/types';
 
 export function useAuth() {
@@ -28,39 +29,42 @@ export function useAuth() {
    * メール+パスワードでサインイン
    */
   const signIn = async (email: string, password: string) => {
-    try {
-      const response = await authClient.signIn.email(
-        {
-          email,
-          password,
+    const response = await authClient.signIn.email(
+      {
+        email,
+        password,
+      },
+      {
+        onError: (ctx) => {
+          // エラーログ（デバッグ用）
+          console.error('Sign in error:', ctx.error);
         },
-        {
-          onError: (ctx) => {
-            // エラーハンドリング
-            console.error('Sign in error:', ctx.error);
-          },
-        },
-      );
+      },
+    );
 
-      // エラーチェック
-      if (response.error) {
-        const errorMessage = response.error.message || 'サインインに失敗しました';
-        throw new Error(errorMessage);
+    // エラーチェックと日本語への変換
+    if (response.error) {
+      let errorMessage: string;
+
+      // エラーコードが日本語エラーメッセージマップに存在するか確認
+      if (response.error.code && response.error.code in errorMessages) {
+        // 標準エラーコードから日本語メッセージを取得
+        errorMessage = getErrorMessage(response.error.code, 'サインインに失敗しました');
+      } else {
+        // カスタムエラー（アカウントロック等）の場合
+        // バックエンドから返されたメッセージをそのまま使用
+        errorMessage = response.error.message || 'サインインに失敗しました';
       }
 
-      // データの存在確認
-      if (!response.data) {
-        throw new Error('サインインに失敗しました');
-      }
+      throw new Error(errorMessage);
+    }
 
-      return response.data;
-    } catch (error) {
-      // エラーを適切に再スロー
-      if (error instanceof Error) {
-        throw error;
-      }
+    // データの存在確認
+    if (!response.data) {
       throw new Error('サインインに失敗しました');
     }
+
+    return response.data;
   };
 
   /**
@@ -76,13 +80,17 @@ export function useAuth() {
       {
         onError: (ctx) => {
           console.error('Sign up error:', ctx.error);
-          throw new Error(ctx.error.message || '新規登録に失敗しました');
+          // エラーコードから日本語メッセージを取得
+          const errorMessage = getErrorMessage(ctx.error.code, '新規登録に失敗しました');
+          throw new Error(errorMessage);
         },
       },
     );
 
     if (response.error) {
-      throw new Error(response.error.message || '新規登録に失敗しました');
+      // エラーコードから日本語メッセージを取得
+      const errorMessage = getErrorMessage(response.error.code, '新規登録に失敗しました');
+      throw new Error(errorMessage);
     }
 
     return response.data;
