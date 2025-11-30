@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut } from 'lucide-react';
 
-export function LogoutButton() {
+export const LogoutButton = () => {
   const { signOut, loading } = useAuth();
 
   return (
@@ -19,4 +19,4 @@ export function LogoutButton() {
       ログアウト
     </Button>
   );
-}
+};

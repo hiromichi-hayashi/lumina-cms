@@ -4,7 +4,7 @@
  * 管理画面で使用されるナビゲーションサイドバー
  */
 
-export function Sidebar() {
+export const Sidebar = () => {
   return (
     <aside className="w-64 border-r bg-white p-4">
       <nav>
@@ -18,4 +18,4 @@ export function Sidebar() {
       </nav>
     </aside>
   );
-}
+};

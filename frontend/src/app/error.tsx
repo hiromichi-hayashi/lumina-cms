@@ -18,13 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+const Error = ({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) => {
   useEffect(() => {
     // エラーログを記録（開発環境のみ）
     if (process.env.NODE_ENV === 'development') {
@@ -60,4 +54,6 @@ export default function Error({
       </Card>
     </div>
   );
-}
+};
+
+export default Error;

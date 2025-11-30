@@ -4,7 +4,7 @@
  * サイト全体で使用されるグローバルヘッダー
  */
 
-export function Header() {
+export const Header = () => {
   return (
     <header className="border-b bg-white">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -15,4 +15,4 @@ export function Header() {
       </div>
     </header>
   );
-}
+};

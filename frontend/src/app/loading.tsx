@@ -4,7 +4,7 @@
  * ページ遷移時やSuspense境界で表示されるローディング状態
  * Next.js 15 App Routerの推奨ファイル
  */
-export default function Loading() {
+const Loading = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-4">
@@ -13,4 +13,6 @@ export default function Loading() {
       </div>
     </div>
   );
-}
+};
+
+export default Loading;

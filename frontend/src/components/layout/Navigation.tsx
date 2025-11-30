@@ -15,7 +15,7 @@ interface NavigationProps {
   items: NavigationItem[];
 }
 
-export function Navigation({ items }: NavigationProps) {
+export const Navigation = ({ items }: NavigationProps) => {
   return (
     <nav>
       <ul className="flex gap-4">
@@ -32,4 +32,4 @@ export function Navigation({ items }: NavigationProps) {
       </ul>
     </nav>
   );
-}
+};

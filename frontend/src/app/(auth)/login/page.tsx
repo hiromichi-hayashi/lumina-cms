@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: 'Lumina CMS管理画面へのログイン',
 };
 
-export default function LoginPage() {
+const LoginPage = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/50">
       <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-8 shadow-lg">
@@ -32,4 +32,6 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+};
+
+export default LoginPage;
