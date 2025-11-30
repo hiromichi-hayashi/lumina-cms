@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export default function NotFound() {
+const NotFound = () => {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md text-center">
@@ -42,4 +42,6 @@ export default function NotFound() {
       </Card>
     </div>
   );
-}
+};
+
+export default NotFound;

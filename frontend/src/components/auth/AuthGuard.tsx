@@ -18,7 +18,7 @@ interface AuthGuardProps {
   requiredRole?: UserRole;
 }
 
-export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
+export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -66,4 +66,4 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
   }
 
   return <>{children}</>;
-}
+};

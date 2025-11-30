@@ -24,7 +24,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+export const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn } = useAuth();
@@ -162,4 +162,4 @@ export function LoginForm() {
       </Button>
     </form>
   );
-}
+};

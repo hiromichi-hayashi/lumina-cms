@@ -4,7 +4,7 @@
  * サイト全体で使用されるグローバルフッター
  */
 
-export function Footer() {
+export const Footer = () => {
   return (
     <footer className="border-t bg-gray-50">
       <div className="container mx-auto px-4 py-6">
@@ -14,4 +14,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+};

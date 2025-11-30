@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   description: 'Enterprise Content Management System',
 };
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <html lang="ja">
       <body className={inter.className}>
@@ -23,4 +23,6 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
